@@ -2,33 +2,31 @@
 
 
 def menu():
-    """The main menu of teh calculator app
+    """The main menu of the calculator app
     """
 
     print("\t\tmain menu\t\n")
 
-    choices = ["0","1","2","3","4"]
 
-    choice = input("""Choose an operation (1-4):
+    print("""Available operations:
 1) Addition
 2) Subtraction
 3) Multiplication
 4) Division
 0) Exit\n\n""")
 
+    choices = ["0","1","2","3","4"]
     while True:
 
-        choice = input("Choose an operation (1-4): " )
+        choice = input("Choose an operation (0-4): " ).strip()
 
-        if choice == "0":
-            exit("Thank you. Goodbye!")
-        elif choice in choices and not choice == "0":
-            return choice
-        else:
-            print("Please select a number between 0-5")
+        if choice in choices:
+            return int(choice)
+
+        print("Please select a number between 0-4\n")
 
 
-def values():
+def number_of_values():
     """The number of values you (the user) would like to operate with.
 
     Returns:
@@ -36,12 +34,15 @@ def values():
     """
 
     while True:
-        number_of_values = input("How many numbers you want to insert")
+        number_of_values = input("How many values would you like to insert? (min 2 - max 10): ")
 
-        if number_of_values.isdigit():
+        if not number_of_values.isdigit():
+            print("Please enter real numbers only [e.g. 1,2,10].\n")
+        elif number_of_values.isdigit() and int(number_of_values) < 2:
+            print("Minium value is 2! \n")
+        else:
             return int(number_of_values)
 
-        print("please enter real numbers only.\n")
 
 
 def add(numbers : list):
@@ -110,7 +111,6 @@ def multiplication(numbers : list):
     return total,""
 
 
-
 def division(numbers : list):
     """
     performs a multiplication operation across all values in a given list
@@ -121,42 +121,110 @@ def division(numbers : list):
     Returns:
         int : the calculated total
     """
-    
+
     if 0 in numbers:
-        return
+        message = "Error, can not divide by zero!"
+        return numbers[0], message
 
     if len(numbers) == 1:
-        return numbers[0], ""
+        return numbers[0],""
 
     if len(numbers) == 2:
-        return numbers[0] * numbers[1], ""
+        return numbers[0] / numbers[1],""
 
     num1 = numbers.pop(0)
     num2 = numbers.pop(1)
 
-    total = num1 * num2
+    total = num1 / num2
     while (len(numbers) != 0):
-        total = total * numbers.pop()
+        total = total / numbers.pop()
 
     return total,""
 
+def generate_list_of_values(loop_length : int):
+    """
+    Generates the list of numbers we will operate on. The length of the loop is
+    is determined by the user. Max = 10;
+
+    Args:
+        loop_length (int): amount of values to be inserted as determined by user
+
+    Returns:
+        list : the collection of numbers to operate on.
+    """
+
+    numbers = []
+
+    while (len(numbers) != loop_length):
+
+        if (len(numbers) == 0):
+            number = input("Enter the 1st value: ").lower().strip()
+        elif (len(numbers) == 1):
+            number = input("Enter the 2nd value: ").lower().strip()
+        elif (len(numbers) == 2):
+            number = input("Enter the 3rd value: ").lower().strip()
+        else:
+            number = input(f"Enter the {len(numbers)+1}th value: ").lower().strip()
+
+        if (number == "q"):
+            break;
+        elif (not number.isdigit()):
+            print("please enter real numbers only [e.g. 1,25,10] or q to quit.")
+        else:
+            numbers.append(int(number))
+        print()
+    return numbers
 
 
 def logic():
-    operation = menu()
-    loop = values()
+
+    total = 0;
+    message = "shit"
+
+    choices = ["y","yes"]
+
+    while True:
+
+        print()
+        operation = menu()
+        print()
+
+        if operation == 0:
+            exit("Thank you. Goodbye!")
+
+        loop_control = number_of_values()
+        print()
+        values = generate_list_of_values(loop_control)
+
+
+        if operation == 1:
+            total, message  = add(values)
+            print(f"The sum of {values} is: {total}")
+
+        elif operation == 2:
+            total, message = subs(values)
+            print(f"The subtraction of {values} is: {total}")
+
+        elif operation == 3:
+            total, message = multiplication(values)
+            print(f"The multiplication of {values} is: {total}")
+        elif operation == 4:
+            total, message == division(values)
+
+            if total != 0:
+                print(f"The division of {values} is: {total}")
+            else:
+                print(message)
 
 
 
-def addition(num1, num2):
-    return sum(num1,num2)
 
-
-
-
-
-
+        choice = input("\nWould you like to do another operation? (Y/N): ").lower().strip()
+        if choice not in choices:
+            exit("Thank you. Goodbye!")
+        print("---------------------------------------------------------------------------------------")
 
 
 if __name__ == "__main__":
-    menu()
+    logic()
+    # print(number_of_values())
