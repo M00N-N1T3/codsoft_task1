@@ -48,30 +48,97 @@ def add(numbers : list):
     """Returns the sum of all the numbers in the list
 
     Args:
-        numbers (list): numbers to add together
+        numbers (list): numbers to add
 
     Returns:
         int : the sum of the values in the list
     """
-    return sum(numbers);
+    return sum(numbers),"";
 
 
 def subs(numbers : list):
+    """
+    performs a subtraction operation across all values in a given list
+
+    Args:
+        numbers (list): numbers to subtract
+
+    Returns:
+        int : the calculated total
+    """
 
     if len(numbers) == 1:
-        return numbers[0];
+        return numbers[0],""
 
     if len(numbers) == 2:
-        return numbers[0] - numbers[1]
+        return numbers[0] - numbers[1],""
 
-    num1 = numbers.index(numbers[0])
-    num2 = numbers.index(numbers[1])
+    num1 = numbers.pop(0)
+    num2 = numbers.pop(1)
 
     total = num1 - num2
     while (len(numbers) != 0):
-        total = total - numbers.pop
+        total = total - numbers.pop()
 
-    return total
+    return total,""
+
+
+def multiplication(numbers : list):
+    """
+    performs a multiplication operation across all values in a given list
+
+    Args:
+        numbers (list): numbers to multiply
+
+    Returns:
+        int : the calculated total
+    """
+
+    if len(numbers) == 1:
+        return numbers[0],""
+
+    if len(numbers) == 2:
+        return numbers[0] * numbers[1],""
+
+    num1 = numbers.pop(0)
+    num2 = numbers.pop(1)
+
+    total = num1 * num2
+    while (len(numbers) != 0):
+        total = total * numbers.pop()
+
+    return total,""
+
+
+
+def division(numbers : list):
+    """
+    performs a multiplication operation across all values in a given list
+
+    Args:
+        numbers (list): numbers to multiply
+
+    Returns:
+        int : the calculated total
+    """
+    
+    if 0 in numbers:
+        return
+
+    if len(numbers) == 1:
+        return numbers[0], ""
+
+    if len(numbers) == 2:
+        return numbers[0] * numbers[1], ""
+
+    num1 = numbers.pop(0)
+    num2 = numbers.pop(1)
+
+    total = num1 * num2
+    while (len(numbers) != 0):
+        total = total * numbers.pop()
+
+    return total,""
 
 
 
@@ -92,4 +159,4 @@ def addition(num1, num2):
 
 
 if __name__ == "__main__":
-    print(subs([1,2,3,4]))
+    menu()
