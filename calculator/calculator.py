@@ -2,6 +2,8 @@
 
 
 def menu():
+    """The main menu of teh calculator app
+    """
 
     print("\t\tmain menu\t\n")
 
@@ -27,6 +29,11 @@ def menu():
 
 
 def values():
+    """The number of values you (the user) would like to operate with.
+
+    Returns:
+        int:
+    """
 
     while True:
         number_of_values = input("How many numbers you want to insert")
@@ -35,6 +42,36 @@ def values():
             return int(number_of_values)
 
         print("please enter real numbers only.\n")
+
+
+def add(numbers : list):
+    """Returns the sum of all the numbers in the list
+
+    Args:
+        numbers (list): numbers to add together
+
+    Returns:
+        int : the sum of the values in the list
+    """
+    return sum(numbers);
+
+
+def subs(numbers : list):
+
+    if len(numbers) == 1:
+        return numbers[0];
+
+    if len(numbers) == 2:
+        return numbers[0] - numbers[1]
+
+    num1 = numbers.index(numbers[0])
+    num2 = numbers.index(numbers[1])
+
+    total = num1 - num2
+    while (len(numbers) != 0):
+        total = total - numbers.pop
+
+    return total
 
 
 
@@ -55,4 +92,4 @@ def addition(num1, num2):
 
 
 if __name__ == "__main__":
-    menu()
+    print(subs([1,2,3,4]))
