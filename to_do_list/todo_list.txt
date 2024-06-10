@@ -1,3 +1,0 @@
-[#] PRIORITY - NAME: DESCRIPTION
-[1] [crucial] - test_1: works
-[2] [crucial] - test_1: works

@@ -51,10 +51,17 @@ def add(name: str, description: str, mode:str, dir = DEFAULT_NAME):
     return f"Successful added {task_name} to {task_mode}"
 
 def delete_task(index, file = DEFAULT_NAME):
+    
+    tasks = []
+    try:
+        with open(DEFAULT_NAME,'r'):
+            
 
     pass
 
-
-
-message = add("test_1","works","crucial",)
-print(message)
+import random
+choices = ["crucial","low","high"]
+for i in range (1,10):
+    choice = random.choice(choices)
+    message = add(f"test_{i}","works",choice)
+    print(message)
