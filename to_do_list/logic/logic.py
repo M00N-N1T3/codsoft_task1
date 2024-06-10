@@ -9,6 +9,8 @@ PRIORITIES = {
 }
 
 DEFAULT_NAME = "todo_list.txt"
+DEFAULT_TRIGGER = "A"
+HEADER = "[PRIORITY] - NAME: DESCRIPTION\n"
 
 def add(name: str, description: str, mode:str, dir = DEFAULT_NAME):
     """
@@ -24,7 +26,7 @@ def add(name: str, description: str, mode:str, dir = DEFAULT_NAME):
         message : success message
     """
 
-    HEADER = "[#] PRIORITY - NAME: DESCRIPTION\n"
+
     tasks = [HEADER]
     string = f"[{mode}] - {name}: {description}"
 
@@ -41,7 +43,7 @@ def add(name: str, description: str, mode:str, dir = DEFAULT_NAME):
         pass
 
     # appending new task to list of current tasks
-    tasks.append(f'[{len(tasks)}] {string}\n');
+    tasks.append(f'{string}\n')
 
     # overwriting the file with new data
     with open(dir,"w") as file:
@@ -50,18 +52,75 @@ def add(name: str, description: str, mode:str, dir = DEFAULT_NAME):
 
     return f"Successful added {task_name} to {task_mode}"
 
+
+def view_task(trigger = DEFAULT_TRIGGER ,dir = DEFAULT_NAME,):
+    """
+    Displays all the tasks on your todo list.
+
+    Args:
+        trigger (str, optional) : Trigger flag , triggers an output for only the requested task of Priority n.
+        dir (str, optional): The directory of the file. Defaults to DEFAULT_NAME (todo_list.txt).
+    """
+
+    tasks = []
+
+    try:
+        with open(dir) as file:
+            tasks = file.readlines()
+    except (FileNotFoundError):
+        return "Todo list does not exist"
+
+    if len(tasks) < 1:
+        print("You have no tasks.")
+
+    for key, value in PRIORITIES.items():
+
+        # if the trigger word is the same as any of values we break
+        if trigger.lower() == value.lower():
+            break
+
+        # in the event of an abbreviated trigger we use the key to get full trigger
+        if trigger.lower() == key:
+            trigger = value.lower()
+            break
+
+    for task in enumerate(tasks):
+
+        if HEADER in task:
+            print('[#] ',task[1].strip())
+        else:
+
+            # prints everything in the list
+            if trigger == DEFAULT_TRIGGER:
+                print(f'[{task[0]}]',"",task[1], end="")
+
+            # prints only requested data
+            elif trigger in task[1]:
+                print(f'[{task[0]}]',"",task[1], end="")
+
 def delete_task(index, file = DEFAULT_NAME):
-    
+
     tasks = []
     try:
-        with open(DEFAULT_NAME,'r'):
-            
+        with open(DEFAULT_NAME,'r') as file:
+            tasks = file.readlines()
+    except (FileNotFoundError):
+        return "Todo list does not exist"
 
-    pass
+    # deleting
+    print(tasks)
+    del tasks[index]
+    print()
+    print(tasks)
 
-import random
-choices = ["crucial","low","high"]
-for i in range (1,10):
-    choice = random.choice(choices)
-    message = add(f"test_{i}","works",choice)
-    print(message)
+
+
+# import random
+# choices = ["crucial","low","high"]
+# for i in range (1,10):
+#     choice = random.choice(choices)
+#     message = add(f"test_{i}","works",choice)
+#     print(message)
+
+# delete_task(9)
+view_task()
