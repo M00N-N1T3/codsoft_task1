@@ -54,7 +54,7 @@ def add(numbers : list):
     Returns:
         int : the sum of the values in the list
     """
-    return sum(numbers),"";
+    return sum(numbers),""
 
 
 def subs(numbers : list):
@@ -124,7 +124,7 @@ def division(numbers : list):
 
     if 0 in numbers:
         message = "Error, can not divide by zero!"
-        return numbers[0], message
+        return 0, message
 
     if len(numbers) == 1:
         return numbers[0],""
@@ -167,7 +167,7 @@ def generate_list_of_values(loop_length : int):
             number = input(f"Enter the {len(numbers)+1}th value: ").lower().strip()
 
         if (number == "q"):
-            break;
+            break
         elif (not number.isdigit()):
             print("please enter real numbers only [e.g. 1,25,10] or q to quit.")
         else:
@@ -178,8 +178,7 @@ def generate_list_of_values(loop_length : int):
 
 def logic():
 
-    total = 0;
-    message = "shit"
+    total = 0
 
     choices = ["y","yes"]
 
@@ -195,26 +194,29 @@ def logic():
         loop_control = number_of_values()
         print()
         values = generate_list_of_values(loop_control)
+        print()
 
+        show_case_values = []
+        show_case_values.extend(values)
 
         if operation == 1:
-            total, message  = add(values)
-            print(f"The sum of {values} is: {total}")
+            total = add(values)
+            print(f"The sum of {show_case_values} is: {total[0]}")
 
         elif operation == 2:
-            total, message = subs(values)
-            print(f"The subtraction of {values} is: {total}")
+            total = subs(values)
+            print(f"The subtraction of {show_case_values} is: {total[0]}")
 
         elif operation == 3:
-            total, message = multiplication(values)
-            print(f"The multiplication of {values} is: {total}")
+            total = multiplication(values)
+            print(f"The multiplication of {show_case_values} is: {total[0]}")
         elif operation == 4:
-            total, message == division(values)
+            total = division(values)
 
-            if total != 0:
-                print(f"The division of {values} is: {total}")
+            if total[0] != 0:
+                print(f"The division of {show_case_values} is: {total[0]}")
             else:
-                print(message)
+                print(total[1])
 
 
 
@@ -227,4 +229,3 @@ def logic():
 
 if __name__ == "__main__":
     logic()
-    # print(number_of_values())

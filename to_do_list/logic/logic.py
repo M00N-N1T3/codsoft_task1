@@ -10,9 +10,9 @@ PRIORITIES = {
 
 DEFAULT_NAME = "todo_list.txt"
 DEFAULT_TRIGGER = "A"
-HEADER = "[PRIORITY] - NAME: DESCRIPTION\n"
+HEADER = "[PRIORITY] - NAME: DESCRIPTION"
 
-def add(name: str, description: str, mode:str, dir = DEFAULT_NAME):
+def add(name: str, description: str, mode:str, file_name = DEFAULT_NAME):
     """
     Adds a new task to the todo list
 
@@ -27,7 +27,7 @@ def add(name: str, description: str, mode:str, dir = DEFAULT_NAME):
     """
 
 
-    tasks = [HEADER]
+    tasks = []
     string = f"[{mode}] - {name}: {description}"
 
     tmp = string.split('-')
@@ -36,24 +36,28 @@ def add(name: str, description: str, mode:str, dir = DEFAULT_NAME):
 
     try:
         # first we try to read the data on the file
-        with open(dir,"r") as file:
+        with open(file_name,"r") as file:
             tasks = file.readlines() # creating a list of all the available files
 
     except (FileNotFoundError):
         pass
 
+    # ensuring that the file will always have a Header
+    if len(tasks) <= 0 or tasks[0].strip() != HEADER:
+        tasks.insert(0,HEADER)
+
     # appending new task to list of current tasks
-    tasks.append(f'{string}\n')
+    tasks.append(f'\n{string}')
 
     # overwriting the file with new data
-    with open(dir,"w") as file:
+    with open(file_name,"w") as file:
         file.writelines(tasks)
         file.close()
 
     return f"Successful added {task_name} to {task_mode}"
 
 
-def view_task(trigger = DEFAULT_TRIGGER ,dir = DEFAULT_NAME,):
+def view_task(trigger = DEFAULT_TRIGGER ,file_name = DEFAULT_NAME,):
     """
     Displays all the tasks on your todo list.
 
@@ -65,7 +69,7 @@ def view_task(trigger = DEFAULT_TRIGGER ,dir = DEFAULT_NAME,):
     tasks = []
 
     try:
-        with open(dir) as file:
+        with open(file_name) as file:
             tasks = file.readlines()
     except (FileNotFoundError):
         return "Todo list does not exist"
@@ -86,7 +90,7 @@ def view_task(trigger = DEFAULT_TRIGGER ,dir = DEFAULT_NAME,):
 
     for task in enumerate(tasks):
 
-        if HEADER in task:
+        if f'{HEADER}\n' in task or task[1].strip() == HEADER:
             print('[#] ',task[1].strip())
         else:
 
@@ -97,30 +101,58 @@ def view_task(trigger = DEFAULT_TRIGGER ,dir = DEFAULT_NAME,):
             # prints only requested data
             elif trigger in task[1]:
                 print(f'[{task[0]}]',"",task[1], end="")
+    print()
 
-def delete_task(index, file = DEFAULT_NAME):
+def delete_task(index, file_name = DEFAULT_NAME):
 
     tasks = []
+    tmp = []
+
     try:
         with open(DEFAULT_NAME,'r') as file:
             tasks = file.readlines()
+            file.close()
     except (FileNotFoundError):
         return "Todo list does not exist"
 
-    # deleting
-    print(tasks)
-    del tasks[index]
-    print()
-    print(tasks)
+
+    if index > len(tasks)-1:
+        return 'Selected task number does not exists.'
+
+
+    # getting task name
+    tmp = tasks[index].split('-')[1]
+    task_name = tmp.split(':')[0].strip()
+
+    # confirm deleting
+    choice = input(f"Confirm delete of task {tasks[index]} (y/yes): ").lower()
+
+    if choice == 'y' or choice == 'yes':
+        # deleting task
+        del tasks[index]
+        
+        # stripping the newline character from the last entry in the list
+        tasks[len(tasks)-1] = tasks[len(tasks)-1].strip()
+
+        # overwriting the file with new data
+        with open(file_name,"w") as file:
+            file.writelines(tasks)
+            file.close()
+
+        return f"Successful deleted {task_name} from tasks!"
+    else:
+        return f"Aborting deleting of {task_name}"
 
 
 
-# import random
-# choices = ["crucial","low","high"]
+
+import random
+choices = ["crucial","low","high"]
 # for i in range (1,10):
 #     choice = random.choice(choices)
 #     message = add(f"test_{i}","works",choice)
 #     print(message)
 
-# delete_task(9)
+m = delete_task(1)
+print(m)
 view_task()

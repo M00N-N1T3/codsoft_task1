@@ -69,11 +69,11 @@ class Division(unittest.TestCase):
 
     def test_division_two_value(self):
         result = division([1,2])
-        self.assertEqual(2,result[0])
+        self.assertEqual(0.5,result[0])
 
     def test_division_value(self):
         result = division([1,2,3,4])
-        self.assertEqual(24,result[0])
+        self.assertEqual(0.04166666666666666424,result[0])
 
     def test_division_by_zero(self):
         result = division([1,2,3,4,0])
@@ -81,7 +81,7 @@ class Division(unittest.TestCase):
 
     def test_division_by_neg(self):
         result = division([-1,2,3,4])
-        self.assertEqual(-24,result[0])
+        self.assertEqual(-0.041666666666666664,result[0])
 
 
 
