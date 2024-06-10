@@ -12,15 +12,15 @@ DEFAULT_NAME = "todo_list.txt"
 DEFAULT_TRIGGER = "A"
 HEADER = "[PRIORITY] - NAME: DESCRIPTION"
 
-def add(name: str, description: str, mode:str, file_name = DEFAULT_NAME):
+def add(task_name: str, description: str, priority:str, file_name = DEFAULT_NAME):
     """
     Adds a new task to the todo list
 
     Args:
         dir (str): save path of the todo list [DEFAULT = todo_list.txt]
-        name (str): the name of task
+        task_name (str): the name of task
         description (str): a small description regarding the task
-        mode (str): PRIORITY of the task
+        priority (str): PRIORITY of the task
 
     Returns:
         message : success message
@@ -28,11 +28,11 @@ def add(name: str, description: str, mode:str, file_name = DEFAULT_NAME):
 
 
     tasks = []
-    string = f"[{mode}] - {name}: {description}"
+    string = f"[{priority}] - {task_name}: {description}"
 
     tmp = string.split('-')
-    task_mode = tmp[0].strip()
-    task_name = tmp[1].split(':')[0].strip()
+    task_priority = tmp[0].strip()
+    name = tmp[1].split(':')[0].strip()
 
     try:
         # first we try to read the data on the file
@@ -54,7 +54,7 @@ def add(name: str, description: str, mode:str, file_name = DEFAULT_NAME):
         file.writelines(tasks)
         file.close()
 
-    return f"Successful added {task_name} to {task_mode}"
+    return f"Successful added {name} to {task_priority}"
 
 
 def view_task(trigger = DEFAULT_TRIGGER ,file_name = DEFAULT_NAME,):
@@ -103,6 +103,7 @@ def view_task(trigger = DEFAULT_TRIGGER ,file_name = DEFAULT_NAME,):
                 print(f'[{task[0]}]',"",task[1], end="")
     print()
 
+
 def delete_task(index, file_name = DEFAULT_NAME):
 
     tasks = []
@@ -130,7 +131,7 @@ def delete_task(index, file_name = DEFAULT_NAME):
     if choice == 'y' or choice == 'yes':
         # deleting task
         del tasks[index]
-        
+
         # stripping the newline character from the last entry in the list
         tasks[len(tasks)-1] = tasks[len(tasks)-1].strip()
 
@@ -143,16 +144,59 @@ def delete_task(index, file_name = DEFAULT_NAME):
     else:
         return f"Aborting deleting of {task_name}"
 
+def update_task(index,task_name: str, description: str, priority:str, file_name = DEFAULT_NAME):
+
+    tasks = []
+    tmp = []
+    option = ""
+
+    try:
+        with open(DEFAULT_NAME,'r') as file:
+            tasks = file.readlines()
+            file.close()
+    except (FileNotFoundError):
+        return "Todo list does not exist"
+
+    if index > len(tasks)-1:
+        return 'Selected task number does not exists.'
+
+    print(f'You have selected task: {tasks[index]}')
+
+    choices = {'a':'all','p':'priority','d':'description','n':'name'}
+
+    print('''P) Change priority.
+D) Change description.
+N) Change task name.
+A) Change all.\n''')
+
+    breaker = 0
+    while True:
+        choice = input('Select only one of the above options: ').lower().strip()
+
+        if breaker > 2:
+            print('Aborting. To many incorrect entires.')
+            break
+
+        if choice in choices.keys():
+            option = choices[choice]
+            print(option)
+            break
+        breaker +=1
 
 
 
-import random
-choices = ["crucial","low","high"]
-# for i in range (1,10):
-#     choice = random.choice(choices)
-#     message = add(f"test_{i}","works",choice)
-#     print(message)
 
-m = delete_task(1)
-print(m)
-view_task()
+""" TODO: add update task method, add status (not_started, in progress, completed)"""
+
+
+# import random
+# choices = ["crucial","low","high"]
+# # for i in range (1,10):
+# #     choice = random.choice(choices)
+# #     message = add(f"test_{i}","works",choice)
+# #     print(message)
+
+# m = delete_task(1)
+# print(m)
+# view_task()
+update_task(8,"","","")
