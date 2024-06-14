@@ -145,7 +145,6 @@ def delete_task(index, file_name = DEFAULT_NAME):
         return f"Aborting deleting of {task_name}"
 
 
-
 def update_task(index,task_name: str, description: str, priority:str, file_name = DEFAULT_NAME):
 
     tasks = []
@@ -233,14 +232,4 @@ def generate_task(task_property: list, original_data: tuple, option: str):
 """ TODO: add update task method, add status (not_started, in progress, completed)"""
 
 
-import random
-choices = ["crucial","low","high"]
-# for i in range (1,10):
-#     choice = random.choice(choices)
-#     message = add(f"test_{i}","works",choice)
-#     print(message)
-
-# m = delete_task(1)
-# print(m)
-view_task()
-update_task(8,"name","data","priority")
+print(__import__("click"))
