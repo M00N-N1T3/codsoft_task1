@@ -1,42 +1,10 @@
-[#] PRIORITY - NAME: DESCRIPTION
-[1] [crucial] - test_1: works
-[2] [crucial] - test_1: works
-[3] [crucial] - test_1: works
-[4] [high] - test_0: works
-[5] [crucial] - test_1: works
-[6] [crucial] - test_2: works
-[7] [crucial] - test_3: works
-[8] [crucial] - test_4: works
-[9] [crucial] - test_5: works
-[10] [crucial] - test_6: works
-[11] [high] - test_7: works
-[12] [crucial] - test_8: works
-[13] [low] - test_9: works
-[14] [high] - test_0: works
-[15] [high] - test_1: works
-[16] [crucial] - test_2: works
-[17] [crucial] - test_3: works
-[18] [crucial] - test_4: works
-[19] [high] - test_5: works
-[20] [high] - test_6: works
-[21] [low] - test_7: works
-[22] [low] - test_8: works
-[23] [high] - test_9: works
-[24] [high] - test_1: works
-[25] [high] - test_2: works
-[26] [low] - test_3: works
-[27] [high] - test_4: works
-[28] [low] - test_5: works
-[29] [crucial] - test_6: works
-[30] [low] - test_7: works
-[31] [high] - test_8: works
-[32] [high] - test_9: works
-[33] [high] - test_1: works
-[34] [high] - test_2: works
-[35] [low] - test_3: works
-[36] [low] - test_4: works
-[37] [high] - test_5: works
-[38] [crucial] - test_6: works
-[39] [crucial] - test_7: works
-[40] [crucial] - test_8: works
-[41] [high] - test_9: works
+[PRIORITY] - NAME: DESCRIPTION
+[low] - test_1: works
+[low] - test_2: works
+[high] - test_3: works
+[low] - test_4: works
+[high] - test_5: works
+[low] - test_6: works
+[high] - test_7: works
+[low] - test_8: works
+[crucial] - test_9: works

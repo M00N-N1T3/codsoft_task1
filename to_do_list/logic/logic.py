@@ -144,10 +144,12 @@ def delete_task(index, file_name = DEFAULT_NAME):
     else:
         return f"Aborting deleting of {task_name}"
 
+
+
 def update_task(index,task_name: str, description: str, priority:str, file_name = DEFAULT_NAME):
 
     tasks = []
-    tmp = []
+    data = (priority,task_name,description)
     option = ""
 
     try:
@@ -161,6 +163,8 @@ def update_task(index,task_name: str, description: str, priority:str, file_name 
         return 'Selected task number does not exists.'
 
     print(f'You have selected task: {tasks[index]}')
+    
+    """TODO: separate prompt to accommodate click """
 
     choices = {'a':'all','p':'priority','d':'description','n':'name'}
 
@@ -179,24 +183,64 @@ A) Change all.\n''')
 
         if choice in choices.keys():
             option = choices[choice]
-            print(option)
             break
         breaker +=1
 
+    task_property = task_properties(tasks[index])
+
+    new_task = generate_task(task_property,data,option)
+    
+    print(new_task)
+
+    return task_property
+
+
+def task_properties(task: str):
+    """
+    generates a list entity of the task
+
+    Args:
+        task (str): the task we need to break apart
+    Return:
+        list :
+    """
+
+    task_priority = task.split("-")[0].replace("[","").replace("]","").strip()
+    task_name  = task.split("-")[1].split(":")[0].strip()
+    task_description  = task.split("-")[1].split(":")[1].strip()
+
+    return [task_priority,task_name,task_description]
+
+def generate_task(task_property: list, original_data: tuple, option: str):
+
+    priority, task_name, description = original_data
+
+    if option == "priority":
+        task_property[0] = priority
+    elif option == "name":
+        task_property[1] = task_name # name
+    elif option == "description":
+        task_property[2] = description
+    else:
+        task_property[0] = priority
+        task_property[1] = task_name
+        task_property[2] = description
+
+    return f"[{task_property[0]}] - {task_property[1]}: {task_property[2]}"
 
 
 
 """ TODO: add update task method, add status (not_started, in progress, completed)"""
 
 
-# import random
-# choices = ["crucial","low","high"]
-# # for i in range (1,10):
-# #     choice = random.choice(choices)
-# #     message = add(f"test_{i}","works",choice)
-# #     print(message)
+import random
+choices = ["crucial","low","high"]
+# for i in range (1,10):
+#     choice = random.choice(choices)
+#     message = add(f"test_{i}","works",choice)
+#     print(message)
 
 # m = delete_task(1)
 # print(m)
-# view_task()
-update_task(8,"","","")
+view_task()
+update_task(8,"name","data","priority")
