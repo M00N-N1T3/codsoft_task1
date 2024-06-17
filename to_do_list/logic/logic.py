@@ -1,17 +1,17 @@
 from os import path
 
 PRIORITIES = {
-    "o" : "Optional",
-    "l" : "Low",
-    "m" : "Medium",
-    "h" : "High",
-    "u" : "Urgent"
+    "o" : "OPTIONAL",
+    "l" : "LOW",
+    "m" : "MEDIUM",
+    "h" : "HIGH",
+    "u" : "URGENT"
 }
 
 STATUS = {
-    "n" : "not started",
-    "i" : "in progress",
-    "c" : "completed"
+    "n" : "NOT STARTED",
+    "i" : "IN PROGRESS",
+    "c" : "COMPLETED"
 }
 
 DEFAULT_NAME = "todo_list.txt"
@@ -245,17 +245,18 @@ def generate_task(task_property: list, original_data: tuple, option: str):
 
 
 
+def change_status(task_properties: list, status: str):
+    
+    for key, value in STATUS.items():
+        if key == status:
+            status = value
+            break
+
+        if value == status:
+            status = value
+            break
+
+    return f"[{status}] [{task_properties[1]}] - {task_properties[2]}: {task_properties[3]}"
 
 
 
-""" TODO: add update task method, add status (not_started, in progress, completed)"""
-def change_status():
-    pass
-
-
-# import random
-
-# for i in range(10):
-#     print(add_task(f"task {i+1}",f"testing_{i+1}",random.choice(["Urgent","Low","Medium"])))
-# view_task()
-update_task(2,"testing the dam thing","","")
