@@ -8,11 +8,18 @@ PRIORITIES = {
     "u" : "Urgent"
 }
 
+STATUS = {
+    "n" : "not started",
+    "i" : "in progress",
+    "c" : "completed"
+}
+
 DEFAULT_NAME = "todo_list.txt"
 DEFAULT_TRIGGER = "A"
-HEADER = "[PRIORITY] - NAME: DESCRIPTION"
+DEFAULT_STATE = "NOT STARTED"
+HEADER = "[STATUS] [PRIORITY] - NAME: DESCRIPTION"
 
-def add(task_name: str, description: str, priority:str, file_name = DEFAULT_NAME):
+def add_task(task_name: str, description: str, priority:str, file_name = DEFAULT_NAME,status = DEFAULT_STATE):
     """
     Adds a new task to the todo list
 
@@ -26,9 +33,8 @@ def add(task_name: str, description: str, priority:str, file_name = DEFAULT_NAME
         message : success message
     """
 
-
     tasks = []
-    string = f"[{priority}] - {task_name}: {description}"
+    string = f"[{status}] [{priority}] - {task_name}: {description}"
 
     tmp = string.split('-')
     task_priority = tmp[0].strip()
@@ -54,8 +60,10 @@ def add(task_name: str, description: str, priority:str, file_name = DEFAULT_NAME
         file.writelines(tasks)
         file.close()
 
-    return f"Successful added {name} to {task_priority}"
+    if (status != DEFAULT_STATE):
+        return f"Successful added {name}. STATUS ({status})"
 
+    return f"Successful added {name}."
 
 def view_task(trigger = DEFAULT_TRIGGER ,file_name = DEFAULT_NAME,):
     """
@@ -101,7 +109,7 @@ def view_task(trigger = DEFAULT_TRIGGER ,file_name = DEFAULT_NAME,):
             # prints only requested data
             elif trigger in task[1]:
                 print(f'[{task[0]}]',"",task[1], end="")
-    print()
+
 
 
 def delete_task(index, file_name = DEFAULT_NAME):
@@ -162,7 +170,7 @@ def update_task(index,task_name: str, description: str, priority:str, file_name 
         return 'Selected task number does not exists.'
 
     print(f'You have selected task: {tasks[index]}')
-    
+
     """TODO: separate prompt to accommodate click """
 
     choices = {'a':'all','p':'priority','d':'description','n':'name'}
@@ -188,7 +196,7 @@ A) Change all.\n''')
     task_property = task_properties(tasks[index])
 
     new_task = generate_task(task_property,data,option)
-    
+
     print(new_task)
 
     return task_property
@@ -204,32 +212,50 @@ def task_properties(task: str):
         list :
     """
 
-    task_priority = task.split("-")[0].replace("[","").replace("]","").strip()
+    task_data = task.split("-")[0].strip()
+
+    # [Complete]
+    task_state = task_data.split("]")[0].replace("[","").replace("]","").strip()
+    # [urgent]
+    task_priority = task_data.split("]")[1].replace("[","").replace("]","").strip()
+
     task_name  = task.split("-")[1].split(":")[0].strip()
     task_description  = task.split("-")[1].split(":")[1].strip()
 
-    return [task_priority,task_name,task_description]
+    return [task_state, task_priority, task_name, task_description]
 
 def generate_task(task_property: list, original_data: tuple, option: str):
 
     priority, task_name, description = original_data
 
+    # if option == "status":
+    #     task_property[0] = status
     if option == "priority":
-        task_property[0] = priority
+        task_property[1] = priority
     elif option == "name":
-        task_property[1] = task_name # name
+        task_property[2] = task_name # name
     elif option == "description":
-        task_property[2] = description
+        task_property[3] = description
     else:
-        task_property[0] = priority
-        task_property[1] = task_name
-        task_property[2] = description
+        task_property[1] = priority
+        task_property[2] = task_name
+        task_property[3] = description
 
-    return f"[{task_property[0]}] - {task_property[1]}: {task_property[2]}"
+    return f"[{task_property[0]}] [{task_property[1]}] - {task_property[2]}: {task_property[3]}"
+
+
+
 
 
 
 """ TODO: add update task method, add status (not_started, in progress, completed)"""
+def change_status():
+    pass
 
 
-print(__import__("click"))
+# import random
+
+# for i in range(10):
+#     print(add_task(f"task {i+1}",f"testing_{i+1}",random.choice(["Urgent","Low","Medium"])))
+# view_task()
+update_task(2,"testing the dam thing","","")
