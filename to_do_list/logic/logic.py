@@ -14,12 +14,12 @@ STATUS = {
     "c" : "COMPLETED"
 }
 
-DEFAULT_NAME = "todo_list.txt"
+DEFAULT_FILENAME = "todo_list.txt"
 DEFAULT_TRIGGER = "A"
 DEFAULT_STATE = "NOT STARTED"
 HEADER = "[STATUS] [PRIORITY] - NAME: DESCRIPTION"
 
-def add_task(task_name: str, description: str, priority:str, file_name = DEFAULT_NAME,status = DEFAULT_STATE):
+def add_task(task_name: str, description: str, priority:str, file_name = DEFAULT_FILENAME,status = DEFAULT_STATE):
     """
     Adds a new task to the todo list
 
@@ -65,7 +65,7 @@ def add_task(task_name: str, description: str, priority:str, file_name = DEFAULT
 
     return f"Successful added {name}."
 
-def view_task(trigger = DEFAULT_TRIGGER ,file_name = DEFAULT_NAME,):
+def view_task(trigger = DEFAULT_TRIGGER ,file_name = DEFAULT_FILENAME,):
     """
     Displays all the tasks on your todo list.
 
@@ -112,13 +112,13 @@ def view_task(trigger = DEFAULT_TRIGGER ,file_name = DEFAULT_NAME,):
 
 
 
-def delete_task(index, file_name = DEFAULT_NAME):
+def delete_task(index, file_name = DEFAULT_FILENAME):
 
     tasks = []
     tmp = []
 
     try:
-        with open(DEFAULT_NAME,'r') as file:
+        with open(DEFAULT_FILENAME,'r') as file:
             tasks = file.readlines()
             file.close()
     except (FileNotFoundError):
@@ -153,14 +153,14 @@ def delete_task(index, file_name = DEFAULT_NAME):
         return f"Aborting deleting of {task_name}"
 
 
-def update_task(index,task_name: str, description: str, priority:str, file_name = DEFAULT_NAME):
+def update_task(index,task_name: str, description: str, priority:str, file_name = DEFAULT_FILENAME):
 
     tasks = []
     data = (priority,task_name,description)
     option = ""
 
     try:
-        with open(DEFAULT_NAME,'r') as file:
+        with open(DEFAULT_FILENAME,'r') as file:
             tasks = file.readlines()
             file.close()
     except (FileNotFoundError):
