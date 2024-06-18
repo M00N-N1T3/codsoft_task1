@@ -1,17 +1,17 @@
 from os import path
 
 PRIORITIES = {
-    "o" : "OPTIONAL",
-    "l" : "LOW",
-    "m" : "MEDIUM",
-    "h" : "HIGH",
-    "u" : "URGENT"
+    "O" : "OPTIONAL",
+    "L" : "LOW",
+    "M" : "MEDIUM",
+    "H" : "HIGH",
+    "U" : "URGENT"
 }
 
 STATUS = {
-    "n" : "NOT STARTED",
-    "i" : "IN PROGRESS",
-    "c" : "COMPLETED"
+    "n" : "NOT STARTED", # \u2610
+    "i" : "IN PROGRESS", # \u25CB
+    "c" : "COMPLETED" # u'\u2713'
 }
 
 DEFAULT_FILENAME = "todo_list.txt"
@@ -34,7 +34,10 @@ def add_task(task_name: str, description: str, priority:str, file_name = DEFAULT
     """
 
     tasks = []
-    string = f"[{status}] [{priority}] - {task_name}: {description}"
+    
+    priority = get_dict_value(PRIORITIES,priority.upper())
+    
+    string = f"[{priority}] [{status}] - {task_name}: {description}"
 
     tmp = string.split('-')
     task_priority = tmp[0].strip()
@@ -259,4 +262,13 @@ def change_status(task_properties: list, status: str):
     return f"[{status}] [{task_properties[1]}] - {task_properties[2]}: {task_properties[3]}"
 
 
+def get_dict_value(dic: dict, given_key:str):
+        for key, value in dic.items():
+            if key == given_key:
+                return value
+
+
+            if value == given_key:
+                status = value
+                break
 
