@@ -38,5 +38,3 @@ DOWNLOADS = download_dir()
 CWD = cwd()
 HOME = user_home()
 
-
-print(__import__("click"))
