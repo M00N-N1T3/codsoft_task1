@@ -26,21 +26,27 @@ def add(name,description,priority,file_name):
     logic.add_task(name,description,priority,file_name)
 
 
-@main.command()
+@main.command(help="update an existing task.")
 @click.option("-i","--index",type=int,prompt = "Enter the task number",help="the index of the task you want to update")
 @click.option("-n","--name",help="the new name if you wish to update the name of the task",default = "")
 @click.option("-d","--description",help = "the new description for the task if you wish to change the task description",default="")
 @click.option("-p","--priority",help="the new priority if you wish to update the task priority",default="")
-def update(index,name,description,priority,path):
+@click.option("-f","--filename",default ="",help="the absolute path + filename of your todo list file")
+def update(index,name,description,priority,filename):
+
+    if filename == "":
+        filename = "/home/void/Desktop/project_space/CODSOFT/to_do_list/todo_list.txt"
+
 
     if name == "" and description == "" and priority =="":
         new_task_data = update_menu()
         if new_task_data == ("","",""):
             print("Aborting operation...")
+            return
     else:
         new_task_data = (name,description,priority.upper())
 
-    logic.update_task(index,new_task_data,path)
+    logic.update_task(index,new_task_data,filename)
     pass
 
 @main.command()
@@ -111,11 +117,11 @@ def status():
 if __name__ == "__main__":
     # print(logic.PRIORITIES.values())
     # print(PR_PROMPT)
-    # main()
+    main()
     path = "/home/void/Desktop/project_space/CODSOFT/to_do_list/todo_list.txt"
     # logic.view_task("L",path)
     # update_menu()
-    logic.update_task(1,("p","test1","test"),path)
+    # logic.update_task(1,("p","test1","test"),path)
     # add()
     pass
 
