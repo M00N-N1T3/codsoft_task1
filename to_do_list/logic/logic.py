@@ -9,13 +9,13 @@ PRIORITIES = {
 }
 
 STATUS = {
-    "n" : "NOT STARTED", # \u2610
-    "i" : "IN PROGRESS", # \u25CB
-    "c" : "COMPLETED" # u'\u2713'
+    "N" : "NOT STARTED", # \u2610
+    "N" : "IN PROGRESS", # \u25CB
+    "C" : "COMPLETED" # u'\u2713'
 }
 
 DEFAULT_FILENAME = "todo_list.txt"
-DEFAULT_TRIGGER = "A"
+DEFAULT_TRIGGER = "ALL"
 DEFAULT_STATE = "NOT STARTED"
 HEADER = "[STATUS] [PRIORITY] - NAME: DESCRIPTION"
 
@@ -34,13 +34,10 @@ def add_task(task_name: str, description: str, priority:str, file_name = DEFAULT
     """
 
     tasks = []
-    
-    priority = get_dict_value(PRIORITIES,priority.upper())
-    
-    string = f"[{priority}] [{status}] - {task_name}: {description}"
 
+    priority = get_dict_value(PRIORITIES,priority.upper())
+    string = f"[{priority}] [{status}] - {task_name}: {description}"
     tmp = string.split('-')
-    task_priority = tmp[0].strip()
     name = tmp[1].split(':')[0].strip()
 
     try:
@@ -66,7 +63,7 @@ def add_task(task_name: str, description: str, priority:str, file_name = DEFAULT
     if (status != DEFAULT_STATE):
         return f"Successful added {name}. STATUS ({status})"
 
-    return f"Successful added {name}."
+    return f"Successful added {task_name}."
 
 def view_task(trigger = DEFAULT_TRIGGER ,file_name = DEFAULT_FILENAME,):
     """
@@ -90,13 +87,16 @@ def view_task(trigger = DEFAULT_TRIGGER ,file_name = DEFAULT_FILENAME,):
 
     for key, value in PRIORITIES.items():
 
+        if trigger == DEFAULT_TRIGGER:
+            break
+
         # if the trigger word is the same as any of values we break
-        if trigger.lower() == value.lower():
+        if trigger == value:
             break
 
         # in the event of an abbreviated trigger we use the key to get full trigger
-        if trigger.lower() == key:
-            trigger = value.lower()
+        if trigger == key:
+            trigger = value
             break
 
     for task in enumerate(tasks):
@@ -112,6 +112,12 @@ def view_task(trigger = DEFAULT_TRIGGER ,file_name = DEFAULT_FILENAME,):
             # prints only requested data
             elif trigger in task[1]:
                 print(f'[{task[0]}]',"",task[1], end="")
+
+        if "\n" in task[1] and trigger in task:
+            print()
+        elif "\n" not in task[1] and trigger == DEFAULT_TRIGGER:
+            print()
+
 
 
 
@@ -231,12 +237,11 @@ def generate_task(task_property: list, original_data: tuple, option: str):
 
     priority, task_name, description = original_data
 
-    # if option == "status":
-    #     task_property[0] = status
+
     if option == "priority":
         task_property[1] = priority
     elif option == "name":
-        task_property[2] = task_name # name
+        task_property[2] = task_name
     elif option == "description":
         task_property[3] = description
     else:
@@ -263,12 +268,12 @@ def change_status(task_properties: list, status: str):
 
 
 def get_dict_value(dic: dict, given_key:str):
-        for key, value in dic.items():
-            if key == given_key:
-                return value
+    for key, value in dic.items():
+        if key == given_key:
+            return value
 
 
-            if value == given_key:
-                status = value
-                break
+        if value == given_key:
+            return value
+
 
