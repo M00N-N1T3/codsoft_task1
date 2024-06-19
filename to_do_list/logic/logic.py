@@ -162,53 +162,33 @@ def delete_task(index, file_name = DEFAULT_FILENAME):
         return f"Aborting deleting of {task_name}"
 
 
-def update_task(index,task_name: str, description: str, priority:str, file_name = DEFAULT_FILENAME):
+def update_task(index : int,new_task_data:list, file_name = DEFAULT_FILENAME):
 
     tasks = []
-    data = (priority,task_name,description)
-    option = ""
+    # priority,task_name,description = new_task_data
+
 
     try:
-        with open(DEFAULT_FILENAME,'r') as file:
+        with open(file_name,'r') as file:
             tasks = file.readlines()
             file.close()
     except (FileNotFoundError):
-        return "Todo list does not exist"
+        print("Todo list does not exist")
+        return
 
     if index > len(tasks)-1:
-        return 'Selected task number does not exists.'
+        print('Selected task number does not exists.')
+        return
 
     print(f'You have selected task: {tasks[index]}')
 
-    """TODO: separate prompt to accommodate click """
+    old_task_data = task_properties(tasks[index])
 
-    choices = {'a':'all','p':'priority','d':'description','n':'name'}
-
-    print('''P) Change priority.
-D) Change description.
-N) Change task name.
-A) Change all.\n''')
-
-    breaker = 0
-    while True:
-        choice = input('Select only one of the above options: ').lower().strip()
-
-        if breaker > 2:
-            print('Aborting. To many incorrect entires.')
-            break
-
-        if choice in choices.keys():
-            option = choices[choice]
-            break
-        breaker +=1
-
-    task_property = task_properties(tasks[index])
-
-    new_task = generate_task(task_property,data,option)
+    new_task = modify_task(old_task_data,new_task_data)
 
     print(new_task)
 
-    return task_property
+    return new_task
 
 
 def task_properties(task: str):
@@ -233,23 +213,44 @@ def task_properties(task: str):
 
     return [task_state, task_priority, task_name, task_description]
 
-def generate_task(task_property: list, original_data: tuple, option: str):
+def modify_task(original_task_data: list, new_task_data: tuple):
 
-    priority, task_name, description = original_data
+    task_name, description, priority = new_task_data
 
+    # priority only
+    if task_name == "" and description == "" and priority != "":
+        original_task_data[1] = priority
 
-    if option == "priority":
-        task_property[1] = priority
-    elif option == "name":
-        task_property[2] = task_name
-    elif option == "description":
-        task_property[3] = description
+    # name only
+    elif task_name != "" and description == "" and priority == "":
+        original_task_data[2] = task_name
+
+    # description
+    elif task_name == "" and description != "" and priority == "":
+        original_task_data[3] = description
+
+    # name and description
+    elif task_name != "" and description != "" and priority == "":
+        original_task_data[2] = task_name
+        original_task_data[3] = description
+
+    # name and priority
+    elif task_name != "" and description == "" and priority != "":
+        original_task_data[2] = task_name
+        original_task_data[1] = priority
+
+    # priority and description
+    elif task_name == "" and description != "" and priority != "":
+        original_task_data[1] = priority
+        original_task_data[3] = description
+
+    # everything
     else:
-        task_property[1] = priority
-        task_property[2] = task_name
-        task_property[3] = description
+        original_task_data[1] = priority
+        original_task_data[2] = task_name
+        original_task_data[3] = description
 
-    return f"[{task_property[0]}] [{task_property[1]}] - {task_property[2]}: {task_property[3]}"
+    return f"[{original_task_data[0]}] [{original_task_data[1]}] - {original_task_data[2]}: {original_task_data[3]}"
 
 
 
