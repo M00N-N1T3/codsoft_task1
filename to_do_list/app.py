@@ -1,46 +1,56 @@
 from lib import click
 from logic import logic
-from logic.os_mod import DOWNLOADS, CWD, HOME,join
+from logic.os_mod import DOWNLOADS, CWD, HOME,join, basename, exists, isfile, remove, listdir
 
+
+def main_path():
+    return join(DOWNLOADS,"TaskIT")
+
+def file_path(file):
+    file = f"{file}.txt" if not ".txt" in file else file
+    return join(DOWNLOADS,"TaskIT",file)
+    
 
 PR_PROMPT = str(logic.PRIORITIES.values()).strip("dict_values()")
+STATUS_PROMPT = str(logic.STATUS.values()).strip("dict_values()")
 CONFIG_DIR = join(HOME,"betterMe")
-
+MAIN_PATH = main_path()
 
 @click.group()
 def main():
     return
 
-
+# completed
 @main.command(help ="Add a new task to your todo-list")
 @click.option("-n","--name",prompt = "Enter task name", required = True,help = "task name")
 @click.option("-d","--description", prompt ="Enter task description",help = "task description")
 @click.option("-p","--priority", prompt ="Enter task priority" + PR_PROMPT,help = "task priority")
 @click.option("-f","--file-name",default = "",help = "to-do_list filename")
-def add(name,description,priority,file_name):
+def add_task(name,description,priority,file_name):
 
     if file_name == "":
         user_input = input(f"Enter file in which to save the todo list ({logic.DEFAULT_FILENAME}): ")
         if user_input == "":
-            file_name = logic.DEFAULT_FILENAME
+            file_name = file_path(logic.DEFAULT_FILENAME)
         else:
-            file_name = f"{user_input}.txt" if ".txt" not in user_input else user_input
+            file_name = file_path(user_input)
 
     logic.add_task(name,description,priority,file_name)
     return
 
 
+# completed
 @main.command(help="update an existing task.")
 @click.option("-i","--index",type=int,prompt = "Enter the task number",help="the index of the task you want to update")
 @click.option("-n","--name",help="the new name if you wish to update the name of the task",default = "")
 @click.option("-d","--description",help = "the new description for the task if you wish to change the task description",default="")
 @click.option("-p","--priority",help=f"the new priority if you wish to update the task priority {PR_PROMPT}",default="")
-@click.option("-f","--filename",default ="",help="the absolute path + filename of your todo list file")
-def update(index,name,description,priority,filename):
+@click.option("-f","--filename",prompt = f"Enter the name of the file",default =logic.DEFAULT_FILENAME,help="the absolute path + filename of your todo list file")
+def update_task(index,name,description,priority,filename):
 
-    if filename == "":
-        filename = "/home/void/Desktop/project_space/CODSOFT/to_do_list/todo_list.txt"
-
+    filename = file_path(filename)
+    tasks = logic.read_file(filename)
+    print(f"Selected task: {tasks[index]}")
 
     if name == "" and description == "" and priority =="":
         new_task_data = update_menu()
@@ -64,32 +74,103 @@ def update(index,name,description,priority,filename):
     return
 
 
-
+# in progress
 @main.command(help = "delete an existing task")
 @click.option("-i","--index",type=int,prompt = "Enter the task number",help="the index of the task you want to update")
-@click.option("-f","--filename",default ="",help="the absolute path + filename of your todo list file")
-def delete(index,file_name):
-
-    if filename == "":
-        filename = "/home/void/Desktop/project_space/CODSOFT/to_do_list/todo_list.txt"
-
-    message = logic.delete_task(index,file_name)
+@click.option("-f","--filename",default =logic.DEFAULT_FILENAME,help="the name of the todo list file")
+def delete_task(index,filename):
+    filename = file_path(filename)
+    tasks = logic.read_file(filename)
+    print(f"Selected task: {tasks[index]}",end="")
+    message = logic.delete_task(index,filename)
     print(message)
-
     return
 
 
 
-@main.command(help="displays your tasks")
+@main.command(help="displays tasks from a selected todo_list")
 @click.option("-f","--filter",help="filter to display certain tasks based off of their priority",default = "ALL")
-@click.option("-p","--path",help="the path of your todo_list file",default="")
-def view(filter,path):
-
-    if path == "":
-        path = "/home/void/Desktop/project_space/CODSOFT/to_do_list/todo_list.txt"
-
+@click.option("-p","--path",help="the filename of the todo_list file if not specified",default=logic.DEFAULT_FILENAME)
+def view_tasks(filter,path):
+    path = file_path(path)
     logic.view_task(filter.upper(),path)
 
+
+
+@main.command(help = "change the status of a task")
+@click.option("-i","--index",type=int,required=1,prompt = "Enter the task number",help="the index of the task you want to update")
+@click.option("-s","--status",prompt = f"Select a new status {STATUS_PROMPT}",help="change progress of task [NOT STARTED, IN PROGRESS, COMPLETED]")
+@click.option("-f","--filename",required =1,prompt = f"Enter filename",default =logic.DEFAULT_FILENAME,help="the name of the todo list file")
+def change_status(index,status,filename):
+    filename = file_path(filename)
+    tasks = logic.read_file(filename)
+    
+    if len(tasks) < 1:
+        exit("You have no tasks.")
+    
+    if index >= len(tasks):
+        exit(f"task {index} does not exist in {basename(filename)}")
+    
+    print(f"Selected task: {tasks[index]}",end="")
+    logic.change_status(index,status.upper(),filename)
+    return
+
+@main.command(help = "create a new todo_list file")
+@click.option("-f","--filename",required=1, prompt = "Enter the name of the file")
+def create_file(filename):
+    file = file_path(filename)
+    if exists(file) and isfile(file):
+        choice = input(f"{basename(file)} already exists. Enter yes to overwrite file: ").lower()
+        if choice in ["yes","y"]:
+            with open(file,"w") as f:
+                f.close()
+        else:
+            print(f"Could not create {basename(file)}.")
+    elif not exists(filename):
+        with open(file,"w") as f:
+            f.close()
+        print(f"{basename(file)} has been created")
+    else:
+        print(f"Error could not create {basename(file)}")
+    
+        return
+
+@main.command(help="delete an existing task file")
+@click.option("-f","--filename",required=1, prompt = "Enter the name of the file")
+def delete_file(filename):
+    files = listdir(MAIN_PATH)
+    filename = file_path(filename)
+    choice = ""
+    
+
+    if basename(filename) in files:
+        choice = input("Confirm (yes/no): ").lower().strip()
+    else:
+        print(f"{filename} does not exist.")
+        return
+    
+    if choice in ["yes","y"] and exists(filename) and isfile(filename):
+        remove(file_path(filename))
+        print(f"{basename(filename)} deleted!")
+    else:
+        if not isfile(filename):
+            print(f"{filename} is a dir.")
+        print(f"Aborting operation...")
+    
+    return
+
+@main.command(help="list all available todo lists")
+def list_all():
+    files = listdir(MAIN_PATH)
+    if len(files) < 1:
+        print("You currently own no todo_list files")
+        return
+    else:
+        print("Your available todo_list files: ")
+        
+    for file in  files:
+        print(file)
+        
 
 # helpers
 def update_menu():
@@ -133,27 +214,24 @@ def update_menu():
             return [name,desc,priority]
 
         breaker +=1
+        
 
-
-@main.command(help = "change the status of a task")
-@click.option("-i","--index",type=int,prompt = "Enter the task number",help="the index of the task you want to update")
-@click.option("-s","--status",prompt = "Enter the new status ",help="change progress of task [NOT STARTED, IN PROGRESS, COMPLETED]")
-def status():
-    pass
 
 """TODO: a setup that checks for a config. the config stores all the available todo list paths"""
 """TODO: learn tabulate for viewing"""
 """TODO: test the status update, create a new todo list"""
-
+"""TODO: Add a logic for length less than 5 then do not write it"""
 if __name__ == "__main__":
     # print(logic.PRIORITIES.values())
     # print(PR_PROMPT)
     main()
-    path = "/home/void/Desktop/project_space/CODSOFT/to_do_list/todo_list.txt"
+    # add_task()
+    # path = "/home/wtc/Desktop/project_space/CODSOFT/to_do_list/todo_list.txt"
     # logic.view_task("L",path)
     # update_menu()
     # logic.update_task(1,("p","test1","test"),path)
     # add()
+    # update_task()
     
     pass
 
