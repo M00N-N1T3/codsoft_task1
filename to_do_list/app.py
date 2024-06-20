@@ -6,7 +6,7 @@ from logic.os_mod import DOWNLOADS, CWD, HOME
 PR_PROMPT = str(logic.PRIORITIES.values()).strip("dict_values()")
 @click.group()
 def main():
-    pass
+    return
 
 
 @main.command(help ="Add a new task to your todo-list")
@@ -24,13 +24,14 @@ def add(name,description,priority,file_name):
             file_name = f"{user_input}.txt" if ".txt" not in user_input else user_input
 
     logic.add_task(name,description,priority,file_name)
+    return
 
 
 @main.command(help="update an existing task.")
 @click.option("-i","--index",type=int,prompt = "Enter the task number",help="the index of the task you want to update")
 @click.option("-n","--name",help="the new name if you wish to update the name of the task",default = "")
 @click.option("-d","--description",help = "the new description for the task if you wish to change the task description",default="")
-@click.option("-p","--priority",help="the new priority if you wish to update the task priority",default="")
+@click.option("-p","--priority",help=f"the new priority if you wish to update the task priority {PR_PROMPT}",default="")
 @click.option("-f","--filename",default ="",help="the absolute path + filename of your todo list file")
 def update(index,name,description,priority,filename):
 
@@ -44,14 +45,35 @@ def update(index,name,description,priority,filename):
             print("Aborting operation...")
             return
     else:
-        new_task_data = (name,description,priority.upper())
+        new_task_data = [name,description,priority.upper()]
+
+    if new_task_data[2] != "":
+        if new_task_data[2].upper() in logic.PRIORITIES.keys():
+            new_task_data[2] = logic.PRIORITIES.get(new_task_data[2])
+        elif new_task_data[2].upper() in logic.PRIORITIES.values():
+            pass
+        else:
+            print(f"You have chosen an invalid priority {new_task_data[2]}")
+            print(f"These are the available priorities {PR_PROMPT}")
+            return
 
     logic.update_task(index,new_task_data,filename)
-    pass
+    return
 
-@main.command()
-def delete():
-    pass
+
+
+@main.command(help = "delete an existing task")
+@click.option("-i","--index",type=int,prompt = "Enter the task number",help="the index of the task you want to update")
+@click.option("-f","--filename",default ="",help="the absolute path + filename of your todo list file")
+def delete(index,file_name):
+
+    if filename == "":
+        filename = "/home/void/Desktop/project_space/CODSOFT/to_do_list/todo_list.txt"
+
+    message = logic.delete_task(index,file_name)
+    print(message)
+
+    return
 
 
 
@@ -64,6 +86,7 @@ def view(filter,path):
         path = "/home/void/Desktop/project_space/CODSOFT/to_do_list/todo_list.txt"
 
     logic.view_task(filter.upper(),path)
+
 
 # helpers
 def update_menu():
@@ -93,23 +116,25 @@ def update_menu():
 
         if choice == "1":
             priority = input(f"Enter new priority [{PR_PROMPT}]: ")
-            return ("","",priority)
+            return ["","",priority]
         elif choice == "2":
             name = input(f"Enter the new task name: ")
-            return (name,"","")
+            return [name,"",""]
         elif choice == "3":
             desc= input("Enter the new task description: ")
-            return ("",desc,"")
+            return ["",desc,""]
         elif choice == "4":
             priority = input(f"Enter new priority [{PR_PROMPT}]: ")
             name = input(f"Enter the new task name: ")
             desc= input("Enter the new task description: ")
-            return (name,desc,priority)
+            return [name,desc,priority]
 
         breaker +=1
 
 
-@main.command()
+@main.command(help = "change the status of a task")
+@click.option("-i","--index",type=int,prompt = "Enter the task number",help="the index of the task you want to update")
+@click.option("-s","--status",prompt = "Enter the new status ",help="change progress of task [NOT STARTED, IN PROGRESS, COMPLETED]")
 def status():
     pass
 
@@ -123,6 +148,7 @@ if __name__ == "__main__":
     # update_menu()
     # logic.update_task(1,("p","test1","test"),path)
     # add()
+    
     pass
 
 
