@@ -263,11 +263,11 @@ def modify_status(task_properties: list, status: str):
     return f"[{status}] [{task_properties[1]}] - {task_properties[2]}: {task_properties[3]}"
 
 
-def change_status(index, ):
+def change_status(index,file_name=DEFAULT_FILENAME):
 
     tasks = []
     try:
-        with open(DEFAULT_FILENAME,'r') as file:
+        with open(file_name,'r') as file:
             tasks = file.readlines()
             file.close()
     except (FileNotFoundError):

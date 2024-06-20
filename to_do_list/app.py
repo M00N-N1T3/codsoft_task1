@@ -1,9 +1,12 @@
 from lib import click
 from logic import logic
-from logic.os_mod import DOWNLOADS, CWD, HOME
+from logic.os_mod import DOWNLOADS, CWD, HOME,join
 
 
 PR_PROMPT = str(logic.PRIORITIES.values()).strip("dict_values()")
+CONFIG_DIR = join(HOME,"betterMe")
+
+
 @click.group()
 def main():
     return
@@ -138,6 +141,9 @@ def update_menu():
 def status():
     pass
 
+"""TODO: a setup that checks for a config. the config stores all the available todo list paths"""
+"""TODO: learn tabulate for viewing"""
+"""TODO: test the status update, create a new todo list"""
 
 if __name__ == "__main__":
     # print(logic.PRIORITIES.values())
