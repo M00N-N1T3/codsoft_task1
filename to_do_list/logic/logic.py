@@ -10,7 +10,7 @@ PRIORITIES = {
 
 STATUS = {
     "N" : "NOT STARTED", # \u2610
-    "N" : "IN PROGRESS", # \u25CB
+    "I" : "IN PROGRESS", # \u25CB
     "C" : "COMPLETED" # u'\u2713'
 }
 
@@ -44,7 +44,6 @@ def add_task(task_name: str, description: str, priority:str, file_name = DEFAULT
         # first we try to read the data on the file
         with open(file_name,"r") as file:
             tasks = file.readlines() # creating a list of all the available files
-
     except (FileNotFoundError):
         pass
 
@@ -120,7 +119,6 @@ def view_task(trigger = DEFAULT_TRIGGER ,file_name = DEFAULT_FILENAME,):
 
 
 
-
 def delete_task(index, file_name = DEFAULT_FILENAME):
 
     tasks = []
@@ -180,15 +178,17 @@ def update_task(index : int,new_task_data:list, file_name = DEFAULT_FILENAME):
         print('Selected task number does not exists.')
         return
 
-    print(f'You have selected task: {tasks[index]}')
+    print(f'Selected task: {tasks[index].strip()}')
 
     old_task_data = task_properties(tasks[index])
 
     new_task = modify_task(old_task_data,new_task_data)
 
-    print(new_task)
+    """TODO: WRITE the data"""
+    print(f"Successfully updated task {index}.")
 
     return new_task
+
 
 
 def task_properties(task: str):
@@ -212,6 +212,8 @@ def task_properties(task: str):
     task_description  = task.split("-")[1].split(":")[1].strip()
 
     return [task_state, task_priority, task_name, task_description]
+
+
 
 def modify_task(original_task_data: list, new_task_data: tuple):
 
@@ -254,18 +256,31 @@ def modify_task(original_task_data: list, new_task_data: tuple):
 
 
 
-def change_status(task_properties: list, status: str):
-    
-    for key, value in STATUS.items():
-        if key == status:
-            status = value
-            break
+def modify_status(task_properties: list, status: str):
 
-        if value == status:
-            status = value
-            break
+    status = get_dict_value(status)
 
     return f"[{status}] [{task_properties[1]}] - {task_properties[2]}: {task_properties[3]}"
+
+
+def change_status(index, ):
+
+    tasks = []
+    try:
+        with open(DEFAULT_FILENAME,'r') as file:
+            tasks = file.readlines()
+            file.close()
+    except (FileNotFoundError):
+        return "Todo list does not exist"
+
+
+    if index > len(tasks)-1:
+        return 'Selected task number does not exists.'
+
+    data = task_properties(tasks[index])
+    new_data = modify_status(data,)
+    tasks[index] = new_data
+
 
 
 def get_dict_value(dic: dict, given_key:str):
