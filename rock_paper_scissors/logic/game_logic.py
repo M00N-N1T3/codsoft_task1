@@ -1,6 +1,4 @@
-CHOICES = {"R":"ROCK",
-           "P":"PAPER",
-           "S":"SCISSORS"}
+CHOICES = {"R":"ROCK", "P":"PAPER", "S":"SCISSORS"}
 
 def main(user,computer):
 
@@ -30,35 +28,24 @@ def main(user,computer):
 
             keys.append(data) # appending the key:value pair
 
-
     # used for storing the user/computer and their choice
     victors, choices = [],[]
 
     # users choice
     user_data = keys[0]
-    if 'R' in user_data:
-        temp1 = user_data.split()
-    elif 'S' in user_data:
-        temp1 = user_data.split()
-    else:
-        temp1 = user_data.split()
+    user_name, user_choice = rock_paper_scissors(user_data)
 
     # appending the user and the users choice
-    victors.append(temp1[0])
-    choices.append(temp1[1])
+    victors.append(user_name)
+    choices.append(user_choice)
 
     # computers choice
     computer_data = keys[1]
-    if 'R' in computer_data:
-        temp1 = computer_data.split()
-    elif 'S' in computer_data:
-        temp1 = computer_data.split()
-    else:
-        temp1 = computer_data.split()
+    user_name, user_choice = rock_paper_scissors(computer_data)
 
     # adding computers choice
-    victors.append(temp1[0])
-    choices.append(temp1[1])
+    victors.append(user_name)
+    choices.append(user_choice)
 
     # checking if its draw
     if choices[0] == choices[1]:
@@ -69,7 +56,25 @@ def main(user,computer):
         return victors[choices.index("R")]
     elif "R" in choices and "P" in choices:
         return victors[choices.index("P")]
-    elif "S" in choices and "P" in choices:
+    # elif "S" in choices and "P" in choices:
+    else:
         return victors[choices.index("S")]
 
+def rock_paper_scissors(data: str):
+    """
+    Returns the appropriate symbol representing the users choice
+    Args:
+        data (str): the user and their choice
 
+    Returns:
+        list: user,choice
+    """
+    temp = []
+    if 'R' in data:
+        temp = data.split()
+    elif 'S' in data:
+        temp = data.split()
+    else:
+        temp = data.split()
+
+    return temp[0],temp[1]

@@ -1,4 +1,4 @@
-from random import choice
+import random
 from logic import game_logic as logic
 
 CHOICES = logic.CHOICES
@@ -46,7 +46,7 @@ def with_computer():
         print(f"\t\t\tRound {round}:\n")
         user_choice = prompt()
         user_choice = get_choice(user_choice)
-        computer_choice = choice(["R","S","P"])
+        computer_choice = random.choice(["R","S","P"])
 
         result = logic.main(user_choice,computer_choice)
         if result == "user":
@@ -73,12 +73,12 @@ def with_computer():
 
             if rounds_won != rounds_lost:
                 if rounds_won > rounds_lost:
-                    exit(f"The winner is: {name}")
+                    print(f"The winner is: {name}")
+                    return
                 else:
                     exit(f"The winner is: Computer")
             else:
                 exit("This game was a DRAW.")
-
 
 
 def with_human():
@@ -133,13 +133,13 @@ def with_human():
                 exit("This game was a DRAW.")
 
 
-
 def scoreboard(name_one,name_two, score_one,score_two,draw,clear=True):
         if clear:
             print("\033c",end="Scoreboard:\n")
         print(f'{name_one} - {score_one}')
         print(f"{name_two} - {score_two}")
         print(f"Draws - {draw}")
+
 
 def get_choice(choice: str):
 
@@ -149,6 +149,7 @@ def get_choice(choice: str):
 
         if choice == values:
             return key
+
 
 def prompt():
     while True:
