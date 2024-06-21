@@ -102,13 +102,13 @@ def built_around_upperCase(n:int, upper_case:tuple, lower_case:tuple, numbers: t
             if Up < int(upperCase_count):
                 if char not in ascii_uppercase:
                     new_char = choice(ascii_uppercase) # getting a random uppercase value
-                    # password[password.index(char)] = new_char
+                    password[password.index(char)] = new_char
                     Up +=1
             else:
                 if char in ascii_uppercase:
                     new_char = choice(salt)
+                    password[password.index(char)] = new_char
                     Up -=1
-            password[password.index(char)] = new_char
 
         return "".join(password)
 
@@ -121,13 +121,13 @@ def built_around_upperCase(n:int, upper_case:tuple, lower_case:tuple, numbers: t
             if Low < int(lowerCase_count):
                 if char not in ascii_lowercase:
                     new_char = choice(ascii_lowercase) # getting a random uppercase value
-                    # password[password.index(char)] = new_char
+                    password[password.index(char)] = new_char
                     Low +=1
             else:
                 if char in ascii_lowercase:
                     new_char = choice(salt)
+                    password[password.index(char)] = new_char
                     Low -=1
-            password[password.index(char)] = new_char
 
         return "".join(password)
 
@@ -140,13 +140,13 @@ def built_around_upperCase(n:int, upper_case:tuple, lower_case:tuple, numbers: t
             if  Sym < int(symbols_count):
                 if char not in str_symbols:
                     new_char = choice(str_symbols) # getting a random uppercase value
-                    # password[password.index(char)] = new_char
+                    password[password.index(char)] = new_char
                     Sym +=1
             else:
                 if char in str_symbols:
                     new_char = choice(salt)
+                    password[password.index(char)] = new_char
                     Sym -=1
-            password[password.index(char)] = new_char
 
         return "".join(password)
 
@@ -159,13 +159,14 @@ def built_around_upperCase(n:int, upper_case:tuple, lower_case:tuple, numbers: t
             if  Num < int(numbers_count):
                 if char not in str_numbers:
                     new_char = choice(str_numbers) # getting a random uppercase value
-                    # password[password.index(char)] = new_char
+                    password[password.index(char)] = new_char
                     Sym +=1
+
             else:
                 if char in str_numbers:
                     new_char = choice(salt)
+                    password[password.index(char)] = new_char
                     Sym -=1
-            password[password.index(char)] = new_char
 
         return "".join(password)
 
@@ -177,12 +178,12 @@ def built_around_upperCase(n:int, upper_case:tuple, lower_case:tuple, numbers: t
 #         password += choice(salt)
 #     return password
 
-u = (True,"")
-s = (True,"")
-n = (True,"")
-l = (True,"")
+u = (True,9)
+s = (False,"")
+n = (False,"")
+l = (False,"")
 
-result = built_around_upperCase(10,u,l,n,s)
+result = built_around_upperCase(20,u,l,n,s)
 print(result)
 # if __name__ == "__main__":
 #     pass
