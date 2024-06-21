@@ -30,7 +30,7 @@ def generate_password(password_length: int):
             password += choice(salt)
         else:
             break
-    return password_length
+    return password
 
 
 
@@ -81,7 +81,7 @@ def built_around_upperCase(n:int, upper_case:tuple, lower_case:tuple, numbers: t
 
     password = generate_password(n)
     # if no number was specified for all of them, then we assume that they just want a random one containing all
-    if upper_case == "" and lower_case == "" and numbers =="" and symbols=="":
+    if upperCase_count == "" and lowerCase_count == "" and numbers_count =="" and symbols_count=="":
         return password
 
     Up = char_count(password,ascii_uppercase)
@@ -177,8 +177,13 @@ def built_around_upperCase(n:int, upper_case:tuple, lower_case:tuple, numbers: t
 #         password += choice(salt)
 #     return password
 
+u = (True,"")
+s = (True,"")
+n = (True,"")
+l = (True,"")
 
-
+result = built_around_upperCase(10,u,l,n,s)
+print(result)
 # if __name__ == "__main__":
 #     pass
 
