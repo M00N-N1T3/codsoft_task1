@@ -21,117 +21,149 @@ def main():
         if mode == "0":
             exit("Goodbye...")
         elif mode == "1":
-            with_computer()
+            run_game()
             break
         elif mode == "2":
-            with_human()
+            run_game(False)
             break
 
         if breaker == 3:
             exit("\nToo many incorrect entries. Exiting game.\nGoodbye.")
 
 
-def with_computer():
-    name = input("\nEnter your name: ")
-    user = 0
-    computer = 0
-    draw = 0
-    round = 1
-    rounds_won = 0
-    rounds_lost = 0
-
-    while True:
-        scoreboard(name,"Computer",user,computer,draw)
-
-        print(f"\t\t\tRound {round}:\n")
-        user_choice = prompt()
-        user_choice = get_choice(user_choice)
-        computer_choice = random.choice(["R","S","P"])
-
-        result = logic.main(user_choice,computer_choice)
-        if result == "user":
-            user += 1
-            rounds_won += 1
-            phrase = "You won"
-        elif result == "computer":
-            computer += 1
-            rounds_lost += 1
-            phrase = "You lost"
-        else:
-            phrase = "This round was a draw."
-            draw += 1
-
-        print(f"{phrase}. You chose {CHOICES.get(user_choice)} and the Computer chose {CHOICES.get(computer_choice)}.")
-        rematch = input("\nWould you like to play again (Yes/No): ").lower().strip()
-
-        if rematch in ["y","yes"]:
-            round +=1
-        else:
-            print("\nThank you for playing. \nFinal result:")
-            scoreboard(name,"Computer",user,computer,draw,False)
-            print(f"\nPlayed {round} round(s). Won {rounds_won} - Lost {rounds_lost}")
-
-            if rounds_won != rounds_lost:
-                if rounds_won > rounds_lost:
-                    print(f"The winner is: {name}")
-                    return
-                else:
-                    exit(f"The winner is: Computer")
-            else:
-                exit("This game was a DRAW.")
-
-
-def with_human():
-    player_one_name = input("\nPlayer 1 enter your name: ")
-    player_two_name = input("Player 2 enter your name: ")
+def run_game(computer:bool = True):
+    player_one_name = input("\nEnter your name: ") if computer else input("\nPlayer one, Enter your name: ")
+    player_two_name = "Computer" if computer else input("\nPlayer two, Enter your name: ")
     player_one_score = 0
     player_two_score = 0
     draw = 0
-    round = 1
-    rounds_won_player_one = 0
-    rounds_won_player_two = 0
+    rounds = 1
 
     while True:
-        scoreboard(player_one_name,player_two_name,rounds_won_player_one,rounds_won_player_two,draw)
+        scoreboard(player_one_name,player_two_name,player_one_score,player_two_score,draw)
 
-        print(f"\t\t\tRound {round}:\n")
-        player_one_choice = prompt_player(player_one_name)
+        print(f"\t\t\tRound {rounds}:\n")
+        player_one_choice = prompt(player_one_name)
         player_one_choice = get_choice(player_one_choice)
-
-        player_two_choice = prompt_player(player_two_name)
+        player_two_choice = random.choice(["R","S","P"]) if computer else prompt(player_two_name)
         player_two_choice = get_choice(player_two_choice)
-        print()
-        result = logic.main(player_one_choice,player_two_choice)
-        if result == "user":
-            player_one_score += 1
-            rounds_won_player_one += 1
-            phrase = f"{player_one_name} Won."
-        elif result == "computer":
-            player_two_score += 1
-            rounds_won_player_two += 1
-            phrase = f"{player_two_name} Won."
-        else:
-            phrase = "This round is a draw!"
-            draw += 1
 
-        print(f"{phrase}. {player_one_name} chose {CHOICES.get(player_one_choice)} and {player_two_name} chose {CHOICES.get(player_two_choice)}.")
+        result = logic.main(player_one_choice,player_two_choice)
+        phrase = process_result(result,player_one_name,player_two_name,computer)
+
+        if result == "player_one":
+            player_one_score +=1
+        elif result == "player_two":
+            player_two_score +=1
+        else:
+            draw +=1
+
+        # keeping track of player data
+        player_one =  [player_one_name,player_one_choice,player_one_score]
+        player_two = [player_two_name, player_two_choice,player_two_score]
+
+        message = show_choices(phrase,player_one,player_two,computer)
+        print(message)
+
         rematch = input("\nWould you like to play again (Yes/No): ").lower().strip()
 
         if rematch in ["y","yes"]:
-            round +=1
+            rounds +=1
         else:
             print("\nThank you for playing. \nFinal result:")
             scoreboard(player_one_name,player_two_name,player_one_score,player_two_score,draw,False)
-            print(f"\nPlayed {round} round(s). {player_one_name} {rounds_won_player_one} - {player_two_name} {rounds_won_player_two}")
+            summary = rounds_summary(rounds,player_one,player_two,computer)
+            print(summary)
 
-            if rounds_won_player_one != rounds_won_player_two:
-                if rounds_won_player_one > rounds_won_player_two:
-                    exit(f"The winner is: {player_one_name}")
-                else:
-                    exit(f"The winner is: {player_two_name}")
+            if player_one[2] == player_two[2]:
+                winner = f"The game was a draw!"
+            elif player_one[2] > player_two[2]:
+                winner = f"The winner is: {player_one[0]}"
             else:
-                exit("This game was a DRAW.")
+                winner = f"The winner is: The Computer." if computer else f"The winner is: {player_two[0]}"
 
+            print(winner)
+            return
+
+
+def rounds_summary(rounds:int,p_one:list, p_two:list,computer: bool = True):
+    """
+    A custom round summary based off whether your are playing pc or human.
+
+    Args:
+        rounds (int): number of rounds played
+        p_one (list): player one's name and score
+        p_two (list): player two's name and score
+        computer (bool, optional): trigger for whether we playing human or bot. Defaults to True.
+
+    Returns:
+        str : custom message
+    """
+    p_one_score = p_one[2]
+    p_two_score = p_two[2]
+
+
+    if computer:
+        if p_two_score != 0:
+            p_two_score = abs(p_one[2] - p_two[2])
+
+        message = (f"\nPlayed {rounds} round(s). Won {abs(p_one_score)} - Lost {p_two_score}")
+    else:
+        message = f"\nPlayed {rounds} round(s). {p_one[0]} {p_one[2]} - {p_two[0]} {p_two[2]}"
+
+    return message
+
+def show_choices(phrase: str,p_one:list,p_two:list,computer:bool=True):
+    """
+    Returns the appropriate message based off whether you playing the PC or human
+
+    Args:
+        phrase (str): _description_
+        p_one (list): _description_
+        p_two (list): _description_
+        computer (bool, optional): _description_. Defaults to True.
+
+    Returns:
+        str : custom message
+    """
+
+    player_one_name = p_one[0]
+    player_two_name = p_two[0]
+    player_one = CHOICES.get(p_one[1])
+    player_two = CHOICES.get(p_two[1])
+
+    if computer:
+        message = (f"{phrase} You chose {player_one} and the Computer chose {player_two}.")
+    else:
+        message = (f"{phrase} {player_one_name} chose {player_one} and {player_two_name} chose {player_two}.")
+
+    return message
+
+def process_result(result:str ,p_one_name:str, p_two_name:str,computer:bool =True):
+    """
+    Processes the result and returns the appropriate phrase based off the result
+    as well as the appropriate scores
+
+    Args:
+        result (str): the player that one
+        p_one_name (str): the name of the player
+        p_two_name (str): the name of the player
+        computer (bool, optional): trigger tha checks whether its user vs PC
+        or user vs user. Defaults to True.
+
+    Returns:
+        tuple: phrase, player_one_score, player_two_score
+    """
+
+    phrase = ""
+    if result == "player_one":
+        phrase = "You won!" if computer else f"{p_one_name} won!"
+    elif result == "player_two":
+        phrase = "You lost!" if computer else f"{p_two_name} won!"
+    else:
+        phrase = "This round was a draw."
+
+    return phrase
 
 def scoreboard(name_one,name_two, score_one,score_two,draw,clear=True):
         if clear:
@@ -151,17 +183,10 @@ def get_choice(choice: str):
             return key
 
 
-def prompt():
+def prompt(player_name):
+    print(f"{player_name}'s turn.")
     while True:
-        user_choice = input("\nChoose Rock, Paper or Scissors: ").upper()
-
-        if user_choice in CHOICES.values() or user_choice in CHOICES.keys():
-            return user_choice
-        print("Enter R, P or S\n")
-
-def prompt_player(name):
-    while True:
-        user_choice = input(f"{name} Choose Rock, Paper or Scissors: ").upper()
+        user_choice = input(f"Choose Rock, Paper or Scissors: ").upper()
 
         if user_choice in CHOICES.values() or user_choice in CHOICES.keys():
             return user_choice
