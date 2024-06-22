@@ -1,11 +1,8 @@
-
-
-
 def menu():
     """The main menu of the calculator app
     """
 
-    print("\t\tmain menu\t\n")
+    print("\t\tAdvanced Calculator\t\n")
 
 
     print("""Available operations:
@@ -218,14 +215,7 @@ def logic():
             else:
                 print(total[1])
 
-
-
-
         choice = input("\nWould you like to do another operation? (Y/N): ").lower().strip()
         if choice not in choices:
             exit("Thank you. Goodbye!")
-        print("---------------------------------------------------------------------------------------")
-
-
-if __name__ == "__main__":
-    logic()
+        print("\033c")

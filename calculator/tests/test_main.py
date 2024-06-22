@@ -1,7 +1,5 @@
 import unittest
-from test_base import captured_io, captured_output
-from io import StringIO
-from calculator import *
+from calculator.advanced.calculator import *
 
 
 class Addition(unittest.TestCase):
