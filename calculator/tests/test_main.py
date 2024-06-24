@@ -1,5 +1,5 @@
 import unittest
-from calculator.advanced.calculator import *
+from calculators.advanced.calculator import *
 
 
 class Addition(unittest.TestCase):

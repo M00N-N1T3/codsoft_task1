@@ -9,9 +9,9 @@ def main():
         choice = input("Choose an operation 1-2: ")
 
     if choice == "1":
-        from calculator.simple.calculator import logic
+        from calculators.simple.calculator import logic
     elif choice == "2":
-        from calculator.advanced.calculator import logic
+        from calculators.advanced.calculator import logic
 
     print("\033c")
     logic()
