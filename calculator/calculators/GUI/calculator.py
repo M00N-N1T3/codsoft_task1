@@ -1,35 +1,45 @@
-from lib import tkinter as tk
+# from lib import tkinter as tk
+import tkinter as tk
 
+DEFAULT_FONT = ("Arial",16)
 
 class Calculator:
 
-    def __init__(self):
-        self.root = tk.Tk()
 
-        # root window
+    def __init__(self):
+
+
+        self.root = tk.Tk()
         self.root.title("Calculator")
 
-        # we will add custom colors for our calculator
-        # and try add a dialer theme, but lets keep it simple for now
+        self.root.minsize(width=250,height=250)
+        self.root.maxsize(width=450,height=450)
 
-        self.menubar = tk.Menu(self.root)
+        self.screen = tk.Text(self.root)
+        self.screen.pack(padx=4,pady=4, expand=True,side=tk.TOP)
 
-        # them we will come back to you
-        self.theme = tk.Menu(self.menubar, tearoff=0)
+        self.aux_frame = tk.Frame(self.root)
 
-        # adding a cascade to the menu is how we add a menu into a menu
-        self.menubar.add_cascade(menu=self.theme, label="Theme", font=("Arial", 8))
+        self.button_frame = tk.Frame(self.aux_frame)
 
-        # if you do not config a menu it won't show. Config is the equivalent of pack
-        self.root.config(menu=self.menubar)
 
-        # frames
-        self.frame1 = tk.Frame(self.root)
-        self.screen = tk.Text(self.frame1, height = 2,width=8, font=("Arial" , 16))
-        self.screen.pack(padx=5,pady=2,side=tk.LEFT,expand=True,fill=tk.X)
-        self.frame1.pack(side=tk.TOP,fill=tk.X)
+        self.btn1= button_layout(self.button_frame,0,0,"test")
+        self.button_frame.pack(expand=True, side=tk.LEFT)
+
+        self.aux_frame.pack(expand=True, side=tk.TOP)
+
+
+
+
 
         self.root.mainloop()
+
+class button_layout:
+
+    def __init__(self,frame:tk.Frame ,column: int,row: int,text:str):
+        btn = tk.Button(frame,height=1,width=2,text=text)
+        btn.grid(column=column, row=row,padx=4,pady=4)
+    pass
 
 
 if __name__ == "__main__":
