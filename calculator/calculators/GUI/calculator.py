@@ -19,10 +19,12 @@ class Calculator:
         # self.screen.pack(padx=6,pady=6,expand=False,side=tk.TOP)
 
         self.aux_frame = tk.Frame(self.root)
-        
-        self.screen = tk.Text(self.aux_frame,height=1,font=("Arial",16))
-        self.screen.pack(padx=6,pady=6,expand=False,fill="both")
-        
+        self.a = tk.Frame(self.aux_frame)
+        self.screen = tk.Text(self.a,height=1,font=("Arial",16))
+        self.screen.grid(row=0,column=0)
+        self.a.pack(expand=True,fill="both")
+        # self.screen.pack(padx=6,pady=6,expand=False,fill="both")
+
         self.button_frame = tk.Frame(self.aux_frame)
 
 
