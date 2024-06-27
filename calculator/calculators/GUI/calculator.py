@@ -26,7 +26,7 @@ class Calculator:
         self.screen.focus_set()
         self.screen.bind("<KeyPress>",self.handle_input)
 
-        self.screen.grid(row=0,padx=3,pady=2,columnspan=5)
+        self.screen.grid(row=0,padx=3,pady=3,columnspan=5)
         self.screen_frame.pack(expand=True,fill="both")
         # self.screen.pack(padx=6,pady=6,expand=False,fill="both")
 
@@ -64,7 +64,7 @@ class Calculator:
         self.zero= button_layout(self.button_frame,1,5,"0",lambda: self.clicked("0"))
         self.comma= button_layout(self.button_frame,2,5,",",lambda: self.clicked(","))
 
-        self.equal = tk.Button(self.button_frame,height=5,width=4,text="=",border=2)
+        self.equal = tk.Button(self.button_frame,height=5,width=4,text="=",border=2,command= lambda: self.equals)
         self.equal.grid(column=3,row=4,rowspan=2)
 
 
@@ -81,29 +81,51 @@ class Calculator:
 
     def clear_screen(self):
         try:
+            self.screen.configure(state=["normal"])
             self.screen.delete("0",tk.END)
         except tk.TclError as e:
             e.add_note("Nothing on the screen")
             print(e)
 
     def handle_input(self,event):
-        accepted = ['1','2','3','4','5','6','7','8','9','0',"+",'-',','
-                    ,"BackSpace","Return","KP_Add","KP_Subtract","minus","plus",
-                    "\u2190","Right","Left","KP_1","KP_2","KP_3","KP_4","KP_5","KP_6"
-                    ,"KP_7","KP_8","KP_9","KP_0","Delete"]
 
-        # self.screen.configure(state=["normal"])
+        # accepted keyboard entries
+        keypad = ["KP_1","KP_2","KP_3","KP_4","KP_5","KP_6","KP_7","KP_8","KP_9","KP_0",'KP_Decimal']
+        special = ["BackSpace","KP_Add","KP_Subtract","minus","plus","\u2190","Right","Left","Delete","x","slash"]
+
+        numbers = ["+",'-',",","1","2","3","4","5","6","7","8","9","0"]
+        numbers.extend(keypad); numbers.extend(special)
+
         print(event)
-        if not event.keysym in accepted:
+        if event.keysym in ["Return","KP_Enter"]:
+            self.equals()
+            self.screen.configure(state=["normal"],disabledbackground="White",foreground="Black",background="White",disabledforeground="Black")
+
+        elif not event.keysym in numbers:
             self.screen.configure(state=["disabled"], disabledbackground='white', disabledforeground='Black')
+
         else:
             self.screen.configure(state=["normal"],disabledbackground="White",foreground="Black",background="White",disabledforeground="Black")
 
     def clicked(self,text):
         char_on_screen = self.screen.get()
-        self.screen.focus_force()
-        self.screen.insert(len(char_on_screen),text)
-        self.screen.xview_moveto(1)
+        if text != "=":
+            self.screen.insert(len(char_on_screen),text)
+
+    def equals(self):
+        calculation = self.screen.get()
+        # removing the x
+        calculation = calculation.replace("x",'*') if "x" in calculation else calculation
+        # removing the equal
+        
+        try:
+            result = str(eval(calculation))
+        except Exception: # zero division error, cam mot divide by zero
+            result = "Error"
+
+        self.screen.delete(0,"end")
+        self.screen.insert(0,result)
+
 
 
 class button_layout:
