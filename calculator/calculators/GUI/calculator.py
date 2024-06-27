@@ -19,13 +19,15 @@ class Calculator:
         # self.screen.pack(padx=6,pady=6,expand=False,side=tk.TOP)
 
         self.aux_frame = tk.Frame(self.root)
-        self.a = tk.Frame(self.aux_frame)
+        self.screen_frame = tk.Frame(self.aux_frame)
 
-        self.screen = tk.Entry(self.a,font=("Arial",32),border=2)
+        # self.screen = tk.Text(self.a,font=("Arial",32),width = 11,height=1,border=2)
+        self.screen = tk.Entry(self.screen_frame,font=("Arial",32),width=11)
+        self.screen.focus_set()
         self.screen.bind("<KeyPress>",self.handle_input)
 
-        self.screen.grid(row=0,column=0,padx=3,pady=2)
-        self.a.pack(expand=True,fill="both")
+        self.screen.grid(row=0,padx=3,pady=2,columnspan=5)
+        self.screen_frame.pack(expand=True,fill="both")
         # self.screen.pack(padx=6,pady=6,expand=False,fill="both")
 
         self.button_frame = tk.Frame(self.aux_frame)
@@ -38,10 +40,10 @@ class Calculator:
 
         self.clicked_button = tk.IntVar(self.button_frame)
 
-        self.clear= button_layout(self.button_frame,0,1,"C")
+        self.clear= button_layout(self.button_frame,0,1,"C",self.clear_screen)
         self.divide = button_layout(self.button_frame,1,1,"/",lambda: self.clicked("/"))
         self.multiply= button_layout(self.button_frame,2,1,"X",lambda: self.clicked("x"))
-        self.delete= button_layout(self.button_frame,3,1,"\u2190",self.clear_screen)
+        self.delete= button_layout(self.button_frame,3,1,"\u2190")
 
         self.seven= button_layout(self.button_frame,0,2,"7",lambda: self.clicked("7"))
         self.eight = button_layout(self.button_frame,1,2,"8",lambda: self.clicked("8"))
@@ -88,25 +90,27 @@ class Calculator:
         accepted = ['1','2','3','4','5','6','7','8','9','0',"+",'-',','
                     ,"BackSpace","Return","KP_Add","KP_Subtract","minus","plus",
                     "\u2190","Right","Left","KP_1","KP_2","KP_3","KP_4","KP_5","KP_6"
-                    ,"KP_7","KP_8","KP_9","KP_0"]
+                    ,"KP_7","KP_8","KP_9","KP_0","Delete"]
 
-        self.screen.configure(state=["normal"])
+        # self.screen.configure(state=["normal"])
         print(event)
-        if event.keysym in accepted:
-            self.screen.configure(state=["normal"],background="white")
-            pass
+        if not event.keysym in accepted:
+            self.screen.configure(state=["disabled"], disabledbackground='white', disabledforeground='Black')
         else:
-            self.screen.configure(state=["readonly"])
+            self.screen.configure(state=["normal"],disabledbackground="White",foreground="Black",background="White",disabledforeground="Black")
 
     def clicked(self,text):
         char_on_screen = self.screen.get()
-        self.screen.insert(len(char_on_screen)+1,text)
+        self.screen.focus_force()
+        self.screen.insert(len(char_on_screen),text)
+        self.screen.xview_moveto(1)
+
 
 class button_layout:
     """
     Creates a single button widget for you
     Args:
-        frame (tk.Frame): the frame the button bvelongs to
+        frame (tk.Frame): the frame the button belongs to
     """
 
     def __init__(self,frame:tk.Frame ,column: int,row: int,text:str,command: tk.COMMAND = None,variable :tk.Variable = None):
