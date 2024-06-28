@@ -8,14 +8,15 @@ RED = "#991121"
 LIGHT_GREY = "#313131"
 WHITE = "#FFFFFF"
 
+
 class Calculator:
 
 
     def __init__(self):
 
-        self.string = ""
         self.root = tk.Tk()
         self.screen = Screen(self.root)
+        self.memory = calculator_memory(self.screen)
 
         self.aux_frame = tk.Frame(self.root)
         self.aux_frame.configure(background=BLACK)
@@ -35,10 +36,10 @@ class Calculator:
         self.button_frame.configure(background=BLACK)
 
 
-        self.memory_clear = button_layout(self.button_frame,0,0,"MC")
-        self.memory_plus = button_layout(self.button_frame,1,0,"M+")
-        self.memory_minus = button_layout(self.button_frame,2,0,"M-")
-        self.memory_recall = button_layout(self.button_frame,3,0,"MR")
+        self.memory_clear = button_layout(self.button_frame,0,0,"MC",command = self.memory.memory_clear)
+        self.memory_plus = button_layout(self.button_frame,1,0,"M+",command = self.memory.memory_plus)
+        self.memory_minus = button_layout(self.button_frame,2,0,"M-", command=self.memory.memory_minus)
+        self.memory_recall = button_layout(self.button_frame,3,0,"MR",command=self.memory.memory_recall)
 
         self.clicked_button = tk.IntVar(self.button_frame)
 
@@ -118,8 +119,6 @@ class Calculator:
         text = self.screen.get()
         self.screen.delete(len(text)-1,"end")
 
-
-
     def equals(self):
         calculation = self.screen.get()
         # removing the x
@@ -133,7 +132,44 @@ class Calculator:
         self.screen.delete(0,"end")
         self.screen.insert(0,result)
 
+class calculator_memory:
 
+    def __init__(self,screen: tk.Text|tk.Entry):
+        self.memory = []
+        self.screen=screen
+
+    def memory_recall(self):
+        self.screen.delete("0",tk.END)
+        self.screen.insert(self.memory[0])
+
+    def memory_plus(self):
+
+        old = None
+
+        if len(self.memory) == 1:
+            old = self.memory[0]
+            del self.memory[0]
+
+
+        try:
+            value = str(eval(self.screen.get()))
+            self.memory.append(value)
+        except Exception as e:
+            if old == None:
+                pass
+            else:
+                self.memory.append(old)
+
+    def memory_clear(self):
+        if len(self.memory) > 0:
+            del self.memory[0]
+
+
+    def memory_minus(self):
+        value=self.screen.get()
+
+        if len(self.memory) > 0 and value in self.memory:
+            del self.memory[0]
 
 class button_layout:
     """
