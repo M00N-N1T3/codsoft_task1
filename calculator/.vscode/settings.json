@@ -12,6 +12,7 @@
         "./lib/tkinter/t"
     ],
     "cSpell.words": [
+        "activebackground",
         "tearoff"
     ]
 }

@@ -11,7 +11,6 @@ WHITE = "#FFFFFF"
 
 class Calculator:
 
-    theme = "Dark"
     # button color
     btn_BGColor = ORANGE
     btnABGColor = LIGHT_GREY
@@ -25,8 +24,6 @@ class Calculator:
     frame_FGColor = WHITE
     frame_ABGColor = ORANGE
 
-    # equal
-    equal_BGColor =  ORANGE
 
     def __init__(self):
 
@@ -61,8 +58,6 @@ class Calculator:
         # self.Theme.add_separator() # separates the columns
         self.Theme.add_command(label="Light mode",font=("Arial",8),command=lambda: self.change_theme("Light"))
 
-        # self.filemenu.add_command(label="Close without message",command=exit) # file menu option 2
-
         # lastly we need to add our submenus to our menu Ribbon
         self.menubar.add_cascade(menu=self.Theme,label="Theme",font=("Arial",8))
         self.menubar.add_cascade(menu=self.History,label="History",font=("Arial",8))
@@ -72,13 +67,9 @@ class Calculator:
         self.screen.grid(row=0,padx=3,pady=3,columnspan=5)
         self.screen_frame.pack(expand=True,fill="both")
 
-        self.button_frame = tk.Frame(self.aux_frame)
-        self.button_frame.configure(background=self.frame_BGColor)
-
+        self.button_frame = tk.Frame(self.aux_frame,background=self.frame_BGColor)
 
         self.memory_clear = button_layout(self.button_frame,0,0,"MC",command = self.memory.memory_clear)
-        # self.memory_clear.configure()
-
         self.memory_plus = button_layout(self.button_frame,1,0,"M+",command = self.memory.memory_plus)
         self.memory_minus = button_layout(self.button_frame,2,0,"M-", command=self.memory.memory_minus)
         self.memory_recall = button_layout(self.button_frame,3,0,"MR",command=self.memory.memory_recall)
@@ -107,40 +98,46 @@ class Calculator:
         self.zero= button_layout(self.button_frame,1,5,"0",command=lambda: self.clicked("0"))
         self.comma= button_layout(self.button_frame,2,5,".",command=lambda: self.clicked("."))
 
-        self.equal = tk.Button(self.button_frame,height=5,width=4,text="=",border=2,command=self.equals)
-        self.equal.configure(background=ORANGE)
-        self.equal.grid(column=3,row=4,rowspan=2)
 
+        self.equal = button_layout(self.button_frame,3,4,"=",command=self.equals)
+        self.equal.configure_equal()
 
         self.button_frame.pack(expand=False,fill="both")
-
         self.aux_frame.pack(expand=False,fill="both",padx=10)
-
-
 
         self.root.mainloop()
 
-    def change_theme(self, text):
-        self.theme=text
+    def change_theme(self, theme: str):
 
-                # button color
-        self.btn_BGColor = ORANGE if self.theme == "Dark" else "RED"
-        self.btnABGColor = LIGHT_GREY
+        # button color
+        self.btn_BGColor = ORANGE if theme == "Dark" else WHITE
+        # self.btn_BGColor = ORANGE if theme == "Dark" else LIGHT_GREY
+        self.btnABGColor = WHITE
 
         # screen color
-        self.screen_BGColor = BLACK if self.theme == "Dark" else WHITE
-        self.frame_BGColor = BLACK if self.theme == "Dark" else "RED"
+        self.screen_BGColor = BLACK if theme == "Dark" else "GREY"
 
-        # Menu
-        self.frame_BGColor = BLACK if self.theme == "Dark" else "RED"
-        self.frame_FGColor = WHITE if self.theme == "Dark" else BLACK
-        self.frame_ABGColor = ORANGE if self.theme == "Dark" else "RED"
 
-        # equal
-        self.equal_BGColor =  ORANGE if self.theme == "Dark" else "RED"
+        # frame color
+        self.frame_BGColor = BLACK if theme == "Dark" else "GREY"
+        self.frame_FGColor = WHITE if theme == "Dark" else BLACK
+        self.frame_ABGColor = ORANGE if theme == "Dark" else "GREY"
+        self.frame_AFGColor = WHITE if theme != "DarK" else None
 
-        self.memory_clear.change_theme(BGColor=self.btn_BGColor,ABGColor=self.btnABGColor)
 
+        buttons = [self.memory_plus, self.memory_clear, self.memory_minus, self.memory_recall,
+                   self.clear, self.divide, self.multiply, self.delete, self.seven, self.eight,
+                   self.nine ,self.minus, self.four, self.five ,self.six ,self.plus,
+                   self.one, self.two, self.three, self.percent, self.zero, self.comma, self.equal]
+        for button in buttons:
+            button.change_theme(BGColor=self.btn_BGColor,ABGColor=self.btnABGColor)
+
+        self.menubar.configure(background=self.frame_BGColor,foreground=self.frame_FGColor,activebackground=self.frame_ABGColor,activeforeground=self.frame_AFGColor)
+        self.Theme.configure(background=self.frame_BGColor,foreground=self.frame_FGColor,activebackground=self.frame_ABGColor,activeforeground=self.frame_AFGColor)
+        self.button_frame.configure(background=self.frame_BGColor)
+        self.screen_frame.configure(background=self.screen_BGColor)
+        self.root.configure(background=self.frame_BGColor)
+        self.aux_frame.config(background=self.frame_BGColor)
 
     def get_percent(self):
         values = self.screen.get()
@@ -154,9 +151,6 @@ class Calculator:
             self.screen.delete(0,"end")
             self.screen.insert(0,result)
 
-
-    def calculator_string(self,text: str):
-        self.string = self.string + text
 
     def clear_screen(self):
         try:
@@ -198,9 +192,11 @@ class Calculator:
         calculation = self.screen.get()
         # removing the x
         calculation = calculation.replace("x",'*') if "x" in calculation else calculation
-        # removing the equal
         try:
-            result = eval(calculation)
+            if len(calculation) > 0:
+                result = eval(calculation)
+            else:
+                result=""
         except Exception: # zero division error, cam mot divide by zero
             result = "Error"
 
@@ -260,15 +256,18 @@ class button_layout:
         frame (tk.Frame): the frame the button belongs to
     """
 
-    def __init__(self,frame:tk.Frame ,column: int,row: int,text:str,BGColor: str =ORANGE, ABGColor: str=WHITE, command: tk.COMMAND = None):
-
+    def __init__(self,frame:tk.Frame ,column: int,row: int,text:str, command: tk.COMMAND = None):
         self.btn = tk.Button(frame,height=2,width=4,text=text,command=command,border=2)
-        self.btn.configure(background=BGColor,activebackground=ABGColor,font=("Arial",11))
+        self.btn.configure(background=ORANGE,activebackground=WHITE,font=("Arial",11))
         self.btn.grid(column=column, row=row,padx=4,pady=4)
 
 
     def change_theme(self,BGColor: str =ORANGE, ABGColor: str=WHITE):
         self.btn.configure(background=BGColor,activebackground=ABGColor,font=("Arial",11))
+
+    def configure_equal(self,rowspan: int=2,height:int = 5,width: int=4,border:int=2):
+        self.btn.configure(height=height,width=width,border=border)
+        self.btn.grid(rowspan=rowspan)
 
 class Screen:
 
