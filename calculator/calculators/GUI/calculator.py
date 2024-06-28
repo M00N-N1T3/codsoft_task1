@@ -11,15 +11,32 @@ WHITE = "#FFFFFF"
 
 class Calculator:
 
+    theme = "Dark"
+    # button color
+    btn_BGColor = ORANGE
+    btnABGColor = LIGHT_GREY
+
+    # screen color
+    screen_BGColor = BLACK
+    frame_BGColor = BLACK
+
+    # Menu
+    frame_BGColor = BLACK
+    frame_FGColor = WHITE
+    frame_ABGColor = ORANGE
+
+    # equal
+    equal_BGColor =  ORANGE
 
     def __init__(self):
 
         self.root = tk.Tk()
 
+
         self.aux_frame = tk.Frame(self.root)
-        self.aux_frame.configure(background=BLACK)
+        self.aux_frame.config(background=self.screen_BGColor)
         self.screen_frame = tk.Frame(self.aux_frame)
-        self.screen_frame.configure(background=BLACK)
+        self.screen_frame.config(background=self.screen_BGColor)
 
 
         self.screen = Screen(self.root)
@@ -27,16 +44,22 @@ class Calculator:
         self.screen.focus_set()
         self.screen.bind("<KeyPress>",self.handle_input)
         self.memory = calculator_memory(self.screen)
+        
 
-        self.menubar = tk.Menu(self.root,background=BLACK,foreground=WHITE,activebackground=ORANGE,border=0)
-        self.Theme = tk.Menu(self.menubar,tearoff=0,font=("Arial",8),background=BLACK,foreground=WHITE,activebackground=ORANGE)
+        # self.menubar = tk.Menu(self.root,background=BLACK,foreground=WHITE,activebackground=ORANGE,border=0)
+        # self.Theme = tk.Menu(self.menubar,tearoff=0,font=("Arial",8),background=BLACK,foreground=WHITE,activebackground=ORANGE)
 
-        self.History = tk.Button(self.menubar,font=("Arial",8),background=BLACK)
+
+        self.menubar = tk.Menu(self.root)
+        self.menubar.config(background=self.frame_BGColor,foreground=self.frame_FGColor,activebackground=self.frame_ABGColor,border=0)
+        self.Theme = tk.Menu(self.menubar,tearoff=0,font=("Arial",8),background=self.frame_BGColor,foreground=self.frame_FGColor,activebackground=self.frame_ABGColor)
+
+        self.History = tk.Button(self.menubar,font=("Arial",8),background=self.frame_BGColor)
 
         # Adding dark mode to the calculator
-        self.Theme.add_command(label="Dark mode",font=("Arial",8))
+        self.Theme.add_command(label="Dark mode",font=("Arial",8),command=lambda: self.change_theme("Dark"))
         # self.Theme.add_separator() # separates the columns
-        self.Theme.add_command(label="Light mode",font=("Arial",8))
+        self.Theme.add_command(label="Light mode",font=("Arial",8),command=lambda: self.change_theme("Light"))
 
         # self.filemenu.add_command(label="Close without message",command=exit) # file menu option 2
 
@@ -50,37 +73,39 @@ class Calculator:
         self.screen_frame.pack(expand=True,fill="both")
 
         self.button_frame = tk.Frame(self.aux_frame)
-        self.button_frame.configure(background=BLACK)
+        self.button_frame.configure(background=self.frame_BGColor)
 
 
         self.memory_clear = button_layout(self.button_frame,0,0,"MC",command = self.memory.memory_clear)
+        # self.memory_clear.configure()
+
         self.memory_plus = button_layout(self.button_frame,1,0,"M+",command = self.memory.memory_plus)
         self.memory_minus = button_layout(self.button_frame,2,0,"M-", command=self.memory.memory_minus)
         self.memory_recall = button_layout(self.button_frame,3,0,"MR",command=self.memory.memory_recall)
 
-        self.clear= button_layout(self.button_frame,0,1,"C",self.clear_screen)
-        self.divide = button_layout(self.button_frame,1,1,"/",lambda: self.clicked("/"))
-        self.multiply= button_layout(self.button_frame,2,1,"X",lambda: self.clicked("x"))
-        self.delete= button_layout(self.button_frame,3,1,"\u2190",self.backspace)
+        self.clear= button_layout(self.button_frame,0,1,"C",command=self.clear_screen)
+        self.divide = button_layout(self.button_frame,1,1,"/",command=lambda: self.clicked("/"))
+        self.multiply= button_layout(self.button_frame,2,1,"X",command=lambda: self.clicked("x"))
+        self.delete= button_layout(self.button_frame,3,1,"\u2190",command=self.backspace)
 
-        self.seven= button_layout(self.button_frame,0,2,"7",lambda: self.clicked("7"))
-        self.eight = button_layout(self.button_frame,1,2,"8",lambda: self.clicked("8"))
-        self.nine= button_layout(self.button_frame,2,2,"9",lambda: self.clicked("9"))
-        self.minus= button_layout(self.button_frame,3,2,"-",lambda: self.clicked("-"))
+        self.seven= button_layout(self.button_frame,0,2,"7",command=lambda: self.clicked("7"))
+        self.eight = button_layout(self.button_frame,1,2,"8",command=lambda: self.clicked("8"))
+        self.nine= button_layout(self.button_frame,2,2,"9",command=lambda: self.clicked("9"))
+        self.minus= button_layout(self.button_frame,3,2,"-",command=lambda: self.clicked("-"))
 
 
-        self.four= button_layout(self.button_frame,0,3,"4",lambda: self.clicked("4"))
-        self.five= button_layout(self.button_frame,1,3,"5",lambda: self.clicked("5"))
-        self.six= button_layout(self.button_frame,2,3,"6",lambda: self.clicked("6"))
-        self.plus= button_layout(self.button_frame,3,3,"+",lambda: self.clicked("+"))
+        self.four= button_layout(self.button_frame,0,3,"4",command=lambda: self.clicked("4"))
+        self.five= button_layout(self.button_frame,1,3,"5",command=lambda: self.clicked("5"))
+        self.six= button_layout(self.button_frame,2,3,"6",command=lambda: self.clicked("6"))
+        self.plus= button_layout(self.button_frame,3,3,"+",command=lambda: self.clicked("+"))
 
-        self.one= button_layout(self.button_frame,0,4,"1",lambda: self.clicked("1"))
-        self.two= button_layout(self.button_frame,1,4,"2",lambda: self.clicked("2"))
-        self.three= button_layout(self.button_frame,2,4,"3",lambda: self.clicked("3"))
+        self.one= button_layout(self.button_frame,0,4,"1",command=lambda: self.clicked("1"))
+        self.two= button_layout(self.button_frame,1,4,"2",command=lambda: self.clicked("2"))
+        self.three= button_layout(self.button_frame,2,4,"3",command=lambda: self.clicked("3"))
 
         self.percent= button_layout(self.button_frame,0,5,"%",command=self.get_percent)
-        self.zero= button_layout(self.button_frame,1,5,"0",lambda: self.clicked("0"))
-        self.comma= button_layout(self.button_frame,2,5,".",lambda: self.clicked("."))
+        self.zero= button_layout(self.button_frame,1,5,"0",command=lambda: self.clicked("0"))
+        self.comma= button_layout(self.button_frame,2,5,".",command=lambda: self.clicked("."))
 
         self.equal = tk.Button(self.button_frame,height=5,width=4,text="=",border=2,command=self.equals)
         self.equal.configure(background=ORANGE)
@@ -92,7 +117,29 @@ class Calculator:
         self.aux_frame.pack(expand=False,fill="both",padx=10)
 
 
+
         self.root.mainloop()
+
+    def change_theme(self, text):
+        self.theme=text
+
+                # button color
+        self.btn_BGColor = ORANGE if self.theme == "Dark" else "RED"
+        self.btnABGColor = LIGHT_GREY
+
+        # screen color
+        self.screen_BGColor = BLACK if self.theme == "Dark" else WHITE
+        self.frame_BGColor = BLACK if self.theme == "Dark" else "RED"
+
+        # Menu
+        self.frame_BGColor = BLACK if self.theme == "Dark" else "RED"
+        self.frame_FGColor = WHITE if self.theme == "Dark" else BLACK
+        self.frame_ABGColor = ORANGE if self.theme == "Dark" else "RED"
+
+        # equal
+        self.equal_BGColor =  ORANGE if self.theme == "Dark" else "RED"
+
+        self.memory_clear.change_theme(BGColor=self.btn_BGColor,ABGColor=self.btnABGColor)
 
 
     def get_percent(self):
@@ -213,11 +260,15 @@ class button_layout:
         frame (tk.Frame): the frame the button belongs to
     """
 
-    def __init__(self,frame:tk.Frame ,column: int,row: int,text:str,command: tk.COMMAND = None,variable :tk.Variable = None):
-        btn = tk.Button(frame,height=2,width=4,text=text,command=command,border=2)
-        btn.configure(background=ORANGE,activebackground=WHITE,font=("Arial",11))
-        btn.grid(column=column, row=row,padx=4,pady=4)
-    pass
+    def __init__(self,frame:tk.Frame ,column: int,row: int,text:str,BGColor: str =ORANGE, ABGColor: str=WHITE, command: tk.COMMAND = None):
+
+        self.btn = tk.Button(frame,height=2,width=4,text=text,command=command,border=2)
+        self.btn.configure(background=BGColor,activebackground=ABGColor,font=("Arial",11))
+        self.btn.grid(column=column, row=row,padx=4,pady=4)
+
+
+    def change_theme(self,BGColor: str =ORANGE, ABGColor: str=WHITE):
+        self.btn.configure(background=BGColor,activebackground=ABGColor,font=("Arial",11))
 
 class Screen:
 
@@ -225,8 +276,8 @@ class Screen:
         root.title("Calculator")
         root.configure(background=BLACK)
         root.geometry("300x450")
-        root.minsize(width=300,height=440)
-        root.maxsize(width=300,height=430)
+        root.minsize(width=300,height=450)
+        root.maxsize(width=300,height=450)
 
 
 
