@@ -28,6 +28,23 @@ class Calculator:
         self.screen.bind("<KeyPress>",self.handle_input)
         self.memory = calculator_memory(self.screen)
 
+        self.menubar = tk.Menu(self.root,background=BLACK,foreground=WHITE,activebackground=ORANGE,border=0)
+        self.Theme = tk.Menu(self.menubar,tearoff=0,font=("Arial",8),background=BLACK,foreground=WHITE,activebackground=ORANGE)
+
+        self.History = tk.Button(self.menubar,font=("Arial",8),background=BLACK)
+
+        # Adding dark mode to the calculator
+        self.Theme.add_command(label="Dark mode",font=("Arial",8))
+        # self.Theme.add_separator() # separates the columns
+        self.Theme.add_command(label="Light mode",font=("Arial",8))
+
+        # self.filemenu.add_command(label="Close without message",command=exit) # file menu option 2
+
+        # lastly we need to add our submenus to our menu Ribbon
+        self.menubar.add_cascade(menu=self.Theme,label="Theme",font=("Arial",8))
+        self.menubar.add_cascade(menu=self.History,label="History",font=("Arial",8))
+        # then we need to add our menubar to our root window by using the root.config
+        self.root.config(menu=self.menubar)
 
         self.screen.grid(row=0,padx=3,pady=3,columnspan=5)
         self.screen_frame.pack(expand=True,fill="both")
@@ -40,8 +57,6 @@ class Calculator:
         self.memory_plus = button_layout(self.button_frame,1,0,"M+",command = self.memory.memory_plus)
         self.memory_minus = button_layout(self.button_frame,2,0,"M-", command=self.memory.memory_minus)
         self.memory_recall = button_layout(self.button_frame,3,0,"MR",command=self.memory.memory_recall)
-
-        self.clicked_button = tk.IntVar(self.button_frame)
 
         self.clear= button_layout(self.button_frame,0,1,"C",self.clear_screen)
         self.divide = button_layout(self.button_frame,1,1,"/",lambda: self.clicked("/"))
@@ -63,11 +78,11 @@ class Calculator:
         self.two= button_layout(self.button_frame,1,4,"2",lambda: self.clicked("2"))
         self.three= button_layout(self.button_frame,2,4,"3",lambda: self.clicked("3"))
 
-        self.percent= button_layout(self.button_frame,0,5,"%")
+        self.percent= button_layout(self.button_frame,0,5,"%",command=self.get_percent)
         self.zero= button_layout(self.button_frame,1,5,"0",lambda: self.clicked("0"))
         self.comma= button_layout(self.button_frame,2,5,".",lambda: self.clicked("."))
 
-        self.equal = tk.Button(self.button_frame,height=5,width=4,text="=",border=2,command= lambda: self.equals)
+        self.equal = tk.Button(self.button_frame,height=5,width=4,text="=",border=2,command=self.equals)
         self.equal.configure(background=ORANGE)
         self.equal.grid(column=3,row=4,rowspan=2)
 
@@ -78,6 +93,19 @@ class Calculator:
 
 
         self.root.mainloop()
+
+
+    def get_percent(self):
+        values = self.screen.get()
+        result  = eval(values)
+
+        # result = str(result / 100)
+        result = "{:.9f}".format(result/100)
+        print(result)
+
+        if len(values)!=0:
+            self.screen.delete(0,"end")
+            self.screen.insert(0,result)
 
 
     def calculator_string(self,text: str):
@@ -125,9 +153,12 @@ class Calculator:
         calculation = calculation.replace("x",'*') if "x" in calculation else calculation
         # removing the equal
         try:
-            result = str(eval(calculation))
+            result = eval(calculation)
         except Exception: # zero division error, cam mot divide by zero
             result = "Error"
+
+        if "." in str(result):
+            result = "{:.9f}".format(result)
 
         self.screen.delete(0,"end")
         self.screen.insert(0,result)
