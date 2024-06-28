@@ -15,8 +15,6 @@ class Calculator:
     def __init__(self):
 
         self.root = tk.Tk()
-        self.screen = Screen(self.root)
-        self.memory = calculator_memory(self.screen)
 
         self.aux_frame = tk.Frame(self.root)
         self.aux_frame.configure(background=BLACK)
@@ -24,9 +22,11 @@ class Calculator:
         self.screen_frame.configure(background=BLACK)
 
 
+        self.screen = Screen(self.root)
         self.screen = tk.Entry(self.screen_frame,font=("Arial",32),width=11)
         self.screen.focus_set()
         self.screen.bind("<KeyPress>",self.handle_input)
+        self.memory = calculator_memory(self.screen)
 
 
         self.screen.grid(row=0,padx=3,pady=3,columnspan=5)
@@ -139,8 +139,12 @@ class calculator_memory:
         self.screen=screen
 
     def memory_recall(self):
-        self.screen.delete("0",tk.END)
-        self.screen.insert(self.memory[0])
+
+        if len(self.screen.get()) != 0:
+            self.screen.delete("0",tk.END)
+
+        if len(self.memory) != 0:
+            self.screen.insert(0,self.memory[0])
 
     def memory_plus(self):
 
