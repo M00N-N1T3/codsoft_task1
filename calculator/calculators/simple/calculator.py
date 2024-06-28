@@ -115,7 +115,7 @@ def generate_list_of_values(loop_length : int = 0):
     return numbers
 
 
-def logic():
+def main():
 
     total = 0
 

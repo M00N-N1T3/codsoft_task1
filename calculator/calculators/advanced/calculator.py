@@ -173,7 +173,7 @@ def generate_list_of_values(loop_length : int):
     return numbers
 
 
-def logic():
+def main():
 
     total = 0
 
