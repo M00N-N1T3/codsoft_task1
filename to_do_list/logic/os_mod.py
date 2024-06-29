@@ -2,7 +2,7 @@
 
 from os.path import join, exists,isfile, isdir, basename
 from os import getcwd, mkdir, listdir, remove
-from os import environ
+from os import environ, getenv
 
 
 def cwd():
@@ -34,9 +34,18 @@ def user_home():
     Returns:
         str: home dir
     """
-    return environ.get("HOME")
+    try:
+        home =  environ.get("HOME")
+    except Exception as e:
+        try:
+            home = getenv("USERPROFILE")
+        except Exception as e:
+            home = environ.get("USERPROFILE")
+    return home
 
 DOWNLOADS = download_dir()
 CWD = cwd()
 HOME = user_home()
+
+print(HOME)
 
