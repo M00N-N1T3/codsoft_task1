@@ -67,19 +67,16 @@ def add_task(task_name: str, description: str, priority:str, file_name = DEFAULT
     except Exception as e:
         return False
 
-def view_task(trigger = DEFAULT_TRIGGER ,file_name = DEFAULT_FILENAME,):
+def view_task( tasks: list,trigger = DEFAULT_TRIGGER):
     """
     Displays all the tasks on your todo list.
 
     Args:
+        tasks (list) : a list containing all the available tasks
         trigger (str, optional) : Trigger flag , triggers an output for only the requested task of Priority n.
-        dir (str, optional): The directory of the file. Defaults to DEFAULT_NAME (todo_list.txt).
+    Returns:
+        (list): contains the correct data based off teh mode of the filter
     """
-    tasks = read_file(file_name)
-    if len(tasks) < 1:
-        result = tabulate([["You have no tasks."]],tablefmt="fancy_grid")
-        # print(result)
-        return
 
     for key, value in PRIORITIES.items():
 
@@ -95,46 +92,19 @@ def view_task(trigger = DEFAULT_TRIGGER ,file_name = DEFAULT_FILENAME,):
             trigger = value
             break
 
-    # for task in enumerate(tasks):
-
-    #     if f'{HEADER}\n' in task or task[1].strip() == HEADER:
-    #         print(tabulate('[#] ',task[1].strip()))
-    #     else:
-
-    #         # prints everything in the list
-    #         if trigger == DEFAULT_TRIGGER:
-    #             print(f'[{task[0]}]',"",task[1], end="")
-
-    #         # prints only requested data
-    #         elif trigger in task[1]:
-    #             print(f'[{task[0]}]',"",task[1], end="")
-
-    #     if "\n" in task[1] and trigger in task:
-    #         print()
-    #     elif "\n" not in task[1] and trigger == DEFAULT_TRIGGER:
-    #         print()
-
-    # for task in tasks:
-
-    try:
-        terminal_size = get_terminal_size() + 10
-    except Exception as e:
-        terminal_size = 50
-
-    headers = ["ID","PRIORITY","NAME","DESCRIPTION"]
-    data = [task.strip().split(" ") for task in tasks if trigger]
+    data = []
+    for task in tasks:
+        data.append(task.strip())
 
     requested_data = []
     for task in data:
         if trigger == "ALL":
-            requested_data.append(task)
+            requested_data.append(regex_split(task))
         else:
             if trigger in task:
-                requested_data.append(task)
+                requested_data.append(regex_split(task))
 
-    print(tabulate(requested_data,headers=headers,tablefmt="fancy_grid",maxcolwidths=terminal_size))
-
-
+    return requested_data
 
 
 def delete_task(task_data: list, file_name = DEFAULT_FILENAME):
@@ -155,9 +125,6 @@ def delete_task(task_data: list, file_name = DEFAULT_FILENAME):
     if choice == 'y' or choice == 'yes':
         # deleting task
         del tasks[index]
-
-        # stripping the newline character from the last entry in the list
-        # tasks[len(tasks)-1] = tasks[len(tasks)-1].strip()
 
         # overwriting the file with new data
         with open(file_name,"w") as file:

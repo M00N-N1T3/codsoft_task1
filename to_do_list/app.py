@@ -1,3 +1,4 @@
+from os import get_terminal_size
 from lib import click, tabulate
 from logic import logic
 from logic.os_mod import DOWNLOADS, CWD, HOME,join, basename, exists, isfile, remove, listdir, mkdir
@@ -148,22 +149,49 @@ def delete_task(index,filename):
     selected_task = f"Selected task {data[0].strip('\" \"')}: {data[3].strip(" ")}"
 
     operation = logic.delete_task([index,tasks],filename)
-    
+
     result_message = "Successfully deleted" if operation else "Failed to delete"
     message = f"{result_message} task {index+1} from {basename(filename)}"
-    
+
     tab = tabulate.tabulate([[f"{selected_task} \n{message}"]],tablefmt="fancy_grid")
     print(clear_term,end=tab+"\n")
     return
 
 
 
-@main.command(help="displays tasks from a selected todo_list")
-@click.option("-f","--filter",help="filter to display certain tasks based off of their priority",default = "ALL")
-@click.option("-p","--path",help="the filename of the todo_list file if not specified",default=logic.DEFAULT_FILENAME)
+# @main.command(help="displays tasks from a selected todo_list")
+# @click.option("-f","--filter",help="filter to display certain tasks based off of their priority",default = "ALL")
+# @click.option("-p","--path",help="the filename of the todo_list file if not specified",default=logic.DEFAULT_FILENAME)
 def view_tasks(filter,path):
-    path = file_path(path)
-    logic.view_task(filter.upper(),path)
+    """
+    Lists all the available tasks in a todo_lits file
+
+    Args:
+        filter (str,optional): used to control which tasks gets shown. [Default = ALL]
+        path (str,optional): the name of the todo list file. [Default = todo_list.txt]
+    """
+    filename = file_path(path)
+    tasks = logic.read_file(filename)
+
+    if len(tasks) < 1:
+        tab = tabulate([["You have no available tasks."]],tablefmt="fancy_grid")
+        print(clear_term,end=tab+"\n")
+        return
+
+
+    try:
+        terminal_size = get_terminal_size() + 10
+    except Exception as e:
+        terminal_size = 50
+
+    requested_data = logic.view_task(tasks,filter.upper())
+    headers = ["ID","PRIORITY","NAME","DESCRIPTION","STATUS"]
+    tab = tabulate.tabulate(requested_data,headers=headers,tablefmt="fancy_grid",maxcolwidths=terminal_size)
+    print(end=tab+"\n")
+
+    return
+
+
 
 
 
@@ -319,11 +347,11 @@ def update_message(updated_data:list ):
 
 if __name__ == "__main__":
 
-    if not exists(MAIN_PATH):
-        mkdir(MAIN_PATH)
-    main()
+    # if not exists(MAIN_PATH):
+    #     mkdir(MAIN_PATH)
+    # main()
     # update_task(2,"TEST 2","Testing if it will wokr with spaces","U","todo_list")
-
+    view_tasks("ALL","todo_list.txt")
 
 
 
