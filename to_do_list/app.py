@@ -71,7 +71,6 @@ def update_task(index: int, name: str, description: str, priority: str ,filename
 
     filename = file_path(filename)
     tasks = logic.read_file(filename)
-    updating_data = ""
 
 
     if index == 0 or index > len(tasks)-1:
@@ -82,9 +81,9 @@ def update_task(index: int, name: str, description: str, priority: str ,filename
     # index correction so that we can retrieve correct data
     index -=1
     if name == "" and description == "" and priority =="":
-        new_task_data, message = update_menu()
+        new_task_data, message_one = update_menu()
         if new_task_data == ["","",""]:
-            tab = tabulate.tabulate([[f"{message} \nAborting operation..."]],tablefmt="fancy_grid")
+            tab = tabulate.tabulate([[f"{message_one} \nAborting operation..."]],tablefmt="fancy_grid")
             print(clear_term, end=tab+"\n")
             return
     else:
@@ -105,13 +104,13 @@ def update_task(index: int, name: str, description: str, priority: str ,filename
             return
 
 
-    selected_task = f"Selected task {tasks[index].split(" ")[0].strip('\" \"')}: {tasks[index].split(" ")[3].strip(" ")}"
+    selected_task = f"Selected task {tasks[index][0].strip('\" \"')}: {tasks[index][3].strip(" ")}"
 
-    result = logic.update_task([index,tasks],new_task_data,filename)
     message = update_message(new_task_data)
+    result = logic.update_task([index,tasks],new_task_data,filename)
 
     result_message = "Successfully" if result else "Failed to"
-    message = f"{result_message} updated the {message} of task {tasks[index].split(" ")[0].strip('\" \"')}."
+    message = f"{result_message} updated the {message} of task {tasks[index][0].strip('\" \"')}."
 
     print()
     tab = tabulate.tabulate([["{} \n{}".format(selected_task,message)]],tablefmt="fancy_grid")
@@ -265,13 +264,13 @@ def update_menu():
         print()
         if choice == "1":
             priority = input(f"Enter new priority {PR_PROMPT}: ")
-            return ["","",priority.upper()], "priority"
+            return [priority.upper(),"",""], ""
         elif choice == "2":
             name = input(f"Enter the new task name: ")
-            return [name,"",""], ""
+            return ["",name,""], ""
         elif choice == "3":
             desc= input("Enter the new task description: ")
-            return ["",desc,""], ""
+            return ["","",desc], ""
         elif choice == "4":
             priority = input(f"Enter new priority {PR_PROMPT}: ")
             name = input(f"Enter the new task name: ")
@@ -292,7 +291,7 @@ def update_message(updated_data:list ):
     elif name != "" and priority == "" and description =="":
         message = "name"
     elif description != "" and name == "" and priority =="":
-        message = description
+        message = "description"
     else:
         message = "name, description and priority"
 
