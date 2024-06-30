@@ -173,12 +173,12 @@ def update_task(task_data : list ,new_task_data:list, file_name = DEFAULT_FILENA
 
 
 
-def task_properties(task_data: str):
+def task_properties(task_data: list):
     """
     generates a list entity of the task
 
     Args:
-        task (str): the task we need to break apart
+        task_data (list): the task we need to break apart
     Return:
         list :
     """
@@ -236,16 +236,7 @@ def modify_task(original_task_data: list, new_task_data: tuple):
     return f'"{original_task_data[0]}" "{original_task_data[1]}" "{original_task_data[2]}" "{original_task_data[3]}" "{original_task_data[4]}"'
 
 
-
-def modify_status(task_properties: list, status: str):
-    status = get_dict_value(STATUS,status.upper().strip())
-    
-    if status == None:
-        exit("Incorrect status. \nAborting operation.")
-    return f"[{status}] [{task_properties[1]}] - {task_properties[2]}: {task_properties[3]}"
-
-
-def change_status(index,status,file_name=DEFAULT_FILENAME):
+def change_status(task_data: list, status,file_name=DEFAULT_FILENAME):
     """
     Change the status of a task
 
@@ -254,22 +245,24 @@ def change_status(index,status,file_name=DEFAULT_FILENAME):
         file_name (str, optional): The name of the file we want to modify. Defaults to DEFAULT_FILENAME.
 
     Returns:
-        _type_: _description_
+        boolean :
     """
 
-    tasks = read_file(file_name)
+    index, tasks = task_data
 
-    if index > len(tasks)-1:
-        return 'Selected task number does not exists.'
-
-    data = task_properties(tasks[index])
-    new_task_data = modify_status(data,status)
+    task = regex_split(tasks[index])
+    data = task_properties(task)
+    new_task_data = f'"{data[0]}" "{data[1]}" "{data[2]}" "{data[3]}" "{status}"'
     tasks[index] = new_task_data if index == len(tasks)-1 else f"{new_task_data}\n"
-    
-    with open(file_name,"w") as file:
-        file.writelines(tasks)
-        file.close()
-    print(f"\nSuccessfully updated task {index}.")
+
+    try:
+        with open(file_name,"w") as file:
+            file.writelines(tasks)
+            file.close()
+        return True
+    except Exception as e:
+        return False
+
 
 
 
@@ -282,14 +275,14 @@ def get_dict_value(dic: dict, given_key:str):
             return value
 
 def read_file(filename: str= DEFAULT_FILENAME):
-    tasks = []
+    tasks_read = []
     try:
         with open(filename) as file:
-            tasks = file.readlines()
+            tasks_read = file.readlines()
     except (FileNotFoundError):
-        exit("Todo list does not exist: {}".format(DEFAULT_FILENAME))
+        return ""
 
-    return tasks
+    return tasks_read
 
 def regex_split(text: str):
     """

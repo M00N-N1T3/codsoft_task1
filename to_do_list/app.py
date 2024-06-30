@@ -23,7 +23,7 @@ clear_term ="\033c"
 def main():
     return
 
-# completed
+
 @main.command(help ="Add a new task to your todo-list")
 @click.option("-n","--name",prompt = "Enter task name", required = True,help = "task name")
 @click.option("-d","--description", prompt ="Enter task description",help = "task description")
@@ -52,7 +52,7 @@ def add_task(name: str,description:str ,priority: str, file_name:str ):
     message = f"{name} to {basename(file_name)}"
 
     tab = tabulate.tabulate([[f"{result} {message}"]],tablefmt="fancy_grid")
-    print(clear_term, end=tab+"\n")
+    print(clear_term, end=tab)
     return
 
 
@@ -80,7 +80,7 @@ def update_task(index: int, name: str, description: str, priority: str ,filename
 
     if index == 0 or index > len(tasks):
         tab = tabulate.tabulate([['The selected task number does not exists.']],tablefmt="fancy_grid")
-        print(clear_term,end=tab+"\n")
+        print(tab)
         return
 
     # index correction so that we can retrieve correct data
@@ -89,7 +89,7 @@ def update_task(index: int, name: str, description: str, priority: str ,filename
         new_task_data, message = update_menu()
         if new_task_data == ["","",""]:
             tab = tabulate.tabulate([[f"{message} \nAborting operation..."]],tablefmt="fancy_grid")
-            print(clear_term, end=tab+"\n")
+            print(clear_term, end=tab)
             return
     else:
         # new_task_data, updating_data = [priority.upper(),name,description,]
@@ -105,7 +105,7 @@ def update_task(index: int, name: str, description: str, priority: str ,filename
             m1 = f"You have chosen an invalid priority {new_task_data[2]}"
             m2 = f" \nThese are the available priorities {PR_PROMPT}"
             tab = tabulate.tabulate([[m1 + m2]],tablefmt="fancy_grid")
-            print(clear_term, end=tab+"\n")
+            print(clear_term, end=tab)
             return
 
     # selecting task number and task name
@@ -118,7 +118,7 @@ def update_task(index: int, name: str, description: str, priority: str ,filename
     message = f"{result_message} updated the {message} of task {tasks[index][0].strip('\" \"')}."
 
     tab = tabulate.tabulate([[f"{selected_task} \n{message}"]],tablefmt="fancy_grid")
-    print(clear_term,end=tab+"\n")
+    print(tab)
     return
 
 
@@ -139,7 +139,7 @@ def delete_task(index,filename):
 
     if index == 0 or index > len(tasks):
         tab = tabulate.tabulate([['The selected task number does not exists.']],tablefmt="fancy_grid")
-        print(clear_term,end=tab+"\n")
+        print(tab)
         return
 
     index -=1
@@ -151,17 +151,17 @@ def delete_task(index,filename):
     operation = logic.delete_task([index,tasks],filename)
 
     result_message = "Successfully deleted" if operation else "Failed to delete"
-    message = f"{result_message} task {index+1} from {basename(filename)}"
+    message = f"{result_message} task {index+1} in {basename(filename)}"
 
     tab = tabulate.tabulate([[f"{selected_task} \n{message}"]],tablefmt="fancy_grid")
-    print(clear_term,end=tab+"\n")
+    print(tab)
     return
 
 
 
-# @main.command(help="displays tasks from a selected todo_list")
-# @click.option("-f","--filter",help="filter to display certain tasks based off of their priority",default = "ALL")
-# @click.option("-p","--path",help="the filename of the todo_list file if not specified",default=logic.DEFAULT_FILENAME)
+@main.command(help="displays tasks from a selected todo_list")
+@click.option("-f","--filter",help="filter to display certain tasks based off of their priority",default = "ALL")
+@click.option("-p","--path",help="the filename of the todo_list file if not specified",default=logic.DEFAULT_FILENAME)
 def view_tasks(filter,path):
     """
     Lists all the available tasks in a todo_lits file
@@ -174,8 +174,8 @@ def view_tasks(filter,path):
     tasks = logic.read_file(filename)
 
     if len(tasks) < 1:
-        tab = tabulate([["You have no available tasks."]],tablefmt="fancy_grid")
-        print(clear_term,end=tab+"\n")
+        tab = tabulate.tabulate([["You have no available tasks."]],tablefmt="fancy_grid")
+        print(tab)
         return
 
 
@@ -187,12 +187,9 @@ def view_tasks(filter,path):
     requested_data = logic.view_task(tasks,filter.upper())
     headers = ["ID","PRIORITY","NAME","DESCRIPTION","STATUS"]
     tab = tabulate.tabulate(requested_data,headers=headers,tablefmt="fancy_grid",maxcolwidths=terminal_size)
-    print(end=tab+"\n")
+    print(end=tab)
 
     return
-
-
-
 
 
 @main.command(help = "change the status of a task")
@@ -200,18 +197,63 @@ def view_tasks(filter,path):
 @click.option("-s","--status",prompt = f"Select a new status {STATUS_PROMPT}",help="change progress of task [NOT STARTED, IN PROGRESS, COMPLETED]")
 @click.option("-f","--filename",required =1,prompt = f"Enter filename",default =logic.DEFAULT_FILENAME,help="the name of the todo list file")
 def change_status(index,status,filename):
+    """
+    Changes the status of a task. Status include "COMPLETED", "IN PROGRESS" and "NOT STARTED"
+
+    Args:
+        index (int): the task ID number you want to delete
+        status (str): the new status of the task
+        filename (str): the file in which the task exists in
+    """
     filename = file_path(filename)
     tasks = logic.read_file(filename)
-    
+    status = logic.get_dict_value(logic.STATUS,status.upper().strip())
+
+    if tasks == "":
+        tab = tabulate.tabulate([[f"Todo list does not exist: {basename(filename)}"]],tablefmt="fancy_grid")
+        print(tab)
+        return
+
     if len(tasks) < 1:
-        exit("You have no tasks.")
-    
-    if index >= len(tasks):
-        exit(f"task {index} does not exist in {basename(filename)}")
-    
-    print(f"Selected task: {tasks[index]}",end="")
-    logic.change_status(index,status.upper(),filename)
+        tab = tabulate.tabulate([["You have no available tasks."]],tablefmt="fancy_grid")
+        print(tab)
+        return
+
+    if index > len(tasks):
+        tab = tabulate.tabulate([['The selected task number does not exists.']],tablefmt="fancy_grid")
+        print(tab)
+        return
+
+    if status == None:
+        tab = tabulate.tabulate([["Aborting operation. \nIncorrect status."]],tablefmt="fancy_grid")
+        print(tab)
+        return
+
+
+    index -=1
+    data = logic.regex_split(tasks[index])
+
+    # selecting task number and task name
+    selected_task = f"Selected task {data[0].strip('\" \"')}: {data[3].strip(" ")}"
+
+    operation = logic.change_status([index,tasks],status.upper(),filename)
+
+    # if the state is in progress than user has started the task
+    state = status.lower()
+    if state == "in progress":
+        state = "started"
+
+    state_message = f"You have {state}" if state != "not started" else 'State set to "not started" for'
+
+    result_message = "Failed to update status of task" if not operation else f'{state_message} task'
+    message = f"{result_message} {index+1} in {basename(filename)}"
+
+    tab = tabulate.tabulate([[f"{selected_task} \n{message}"]],tablefmt="fancy_grid")
+    print(tab)
+
     return
+
+
 
 @main.command(help = "create a new todo_list file")
 @click.option("-f","--filename",required=1, prompt = "Enter the name of the file")
@@ -351,7 +393,8 @@ if __name__ == "__main__":
     #     mkdir(MAIN_PATH)
     # main()
     # update_task(2,"TEST 2","Testing if it will wokr with spaces","U","todo_list")
-    view_tasks("ALL","todo_list.txt")
+    # view_tasks("ALL","todo_list.txt")
+    change_status(1,"I","todo_list")
 
 
 
