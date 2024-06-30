@@ -4,6 +4,7 @@ Handles the main logic for operating with / writing on to our todo list
 from os.path import basename
 from os import get_terminal_size
 # from lib.tabulate import tabulate
+import re
 
 PRIORITIES = {
     "O" : "OPTIONAL",
@@ -186,7 +187,10 @@ def update_task(task_data : list ,new_task_data:list, file_name = DEFAULT_FILENA
     write = False
     index, tasks = task_data
 
-    old_task_data = task_properties(tasks[index])
+    # retrieving task from task
+    task = regex_split(tasks[index])
+    old_task_data = task_properties(task)
+
 
     new_task = modify_task(old_task_data,new_task_data)
 
@@ -205,7 +209,7 @@ def update_task(task_data : list ,new_task_data:list, file_name = DEFAULT_FILENA
 
 
 
-def task_properties(task: str):
+def task_properties(task_data: str):
     """
     generates a list entity of the task
 
@@ -215,21 +219,23 @@ def task_properties(task: str):
         list :
     """
 
-    task_data = task.split(" ")
+    # task_data = [data for data in task]
 
-    task_id = task_data[0]
-    task_state = task_data[1]
-    task_priority = task_data[2]
-    task_name  = task_data[3]
-    task_description  = task_data[4]
 
-    return [task_id,task_priority, task_state, task_name, task_description]
+    task_id = task_data[0].strip()
+    task_priority = task_data[1].strip()
+    task_name  = task_data[2].strip()
+    task_description  = task_data[3].strip()
+    task_state = task_data[4].strip()
+
+    return [task_id,task_priority, task_name, task_description, task_state]
 
 
 
 def modify_task(original_task_data: list, new_task_data: tuple):
 
     priority , task_name, description = new_task_data
+    print(new_task_data)
 
     # priority only
     if task_name == "" and description == "" and priority != "":
@@ -250,8 +256,8 @@ def modify_task(original_task_data: list, new_task_data: tuple):
 
     # name and priority
     elif task_name != "" and description == "" and priority != "":
-        original_task_data[2] = task_name
         original_task_data[1] = priority
+        original_task_data[2] = task_name
 
     # priority and description
     elif task_name == "" and description != "" and priority != "":
@@ -264,7 +270,7 @@ def modify_task(original_task_data: list, new_task_data: tuple):
         original_task_data[2] = task_name
         original_task_data[3] = description
 
-    return f'{original_task_data[0]} "{original_task_data[1]}" "{original_task_data[2]}" "{original_task_data[3]}" "{original_task_data[4]}"'
+    return f'"{original_task_data[0]}" "{original_task_data[1]}" "{original_task_data[2]}" "{original_task_data[3]}" "{original_task_data[4]}"'
 
 
 
@@ -321,3 +327,18 @@ def read_file(filename: str= DEFAULT_FILENAME):
         exit("Todo list does not exist: {}".format(DEFAULT_FILENAME))
 
     return tasks
+
+def regex_split(text: str):
+    """
+    splits the given string into a list based off the enclosed quotes
+
+    Args:
+        text (str): the string to split
+    """
+    pattern = re.compile('"([^"]*)"')
+    data = re.split(pattern,text)
+
+    data = [da for da in data if not da in [" ",""]]
+
+    return data
+
