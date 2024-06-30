@@ -52,7 +52,7 @@ def add_task(name: str,description:str ,priority: str, file_name:str ):
     message = f"{name} to {basename(file_name)}"
 
     tab = tabulate.tabulate([[f"{result} {message}"]],tablefmt="fancy_grid")
-    print(clear_term, end=tab)
+    print(tab)
     return
 
 
@@ -77,6 +77,11 @@ def update_task(index: int, name: str, description: str, priority: str ,filename
     filename = file_path(filename)
     tasks = logic.read_file(filename)
 
+    if tasks == "":
+        tab = tabulate.tabulate([[f"Todo list does not exist: {basename(filename)}"]],tablefmt="fancy_grid")
+        print(tab)
+        return
+
 
     if index == 0 or index > len(tasks):
         tab = tabulate.tabulate([['The selected task number does not exists.']],tablefmt="fancy_grid")
@@ -89,7 +94,7 @@ def update_task(index: int, name: str, description: str, priority: str ,filename
         new_task_data, message = update_menu()
         if new_task_data == ["","",""]:
             tab = tabulate.tabulate([[f"{message} \nAborting operation..."]],tablefmt="fancy_grid")
-            print(clear_term, end=tab)
+            print(tab)
             return
     else:
         # new_task_data, updating_data = [priority.upper(),name,description,]
@@ -105,7 +110,7 @@ def update_task(index: int, name: str, description: str, priority: str ,filename
             m1 = f"You have chosen an invalid priority {new_task_data[2]}"
             m2 = f" \nThese are the available priorities {PR_PROMPT}"
             tab = tabulate.tabulate([[m1 + m2]],tablefmt="fancy_grid")
-            print(clear_term, end=tab)
+            print(tab)
             return
 
     # selecting task number and task name
@@ -122,7 +127,6 @@ def update_task(index: int, name: str, description: str, priority: str ,filename
     return
 
 
-
 @main.command(help = "delete an existing task")
 @click.option("-i","--index",type=int,prompt = "Enter the task number",help="the index of the task you want to update")
 @click.option("-f","--filename",default =logic.DEFAULT_FILENAME,help="the name of the todo list file")
@@ -136,6 +140,12 @@ def delete_task(index,filename):
     """
     filename = file_path(filename)
     tasks = logic.read_file(filename)
+
+    if tasks == "":
+        tab = tabulate.tabulate([[f"Todo list does not exist: {basename(filename)}"]],tablefmt="fancy_grid")
+        print(tab)
+        return
+
 
     if index == 0 or index > len(tasks):
         tab = tabulate.tabulate([['The selected task number does not exists.']],tablefmt="fancy_grid")
@@ -160,9 +170,9 @@ def delete_task(index,filename):
 
 
 @main.command(help="displays tasks from a selected todo_list")
-@click.option("-f","--filter",help="filter to display certain tasks based off of their priority",default = "ALL")
-@click.option("-p","--path",help="the filename of the todo_list file if not specified",default=logic.DEFAULT_FILENAME)
-def view_tasks(filter,path):
+@click.option("-s","--show",help="filter to display certain tasks based off of their priority",default = "ALL")
+@click.option("-f","--filename",help="the filename of the todo_list file if not specified",default=logic.DEFAULT_FILENAME)
+def view_tasks(show,filename):
     """
     Lists all the available tasks in a todo_lits file
 
@@ -170,24 +180,29 @@ def view_tasks(filter,path):
         filter (str,optional): used to control which tasks gets shown. [Default = ALL]
         path (str,optional): the name of the todo list file. [Default = todo_list.txt]
     """
-    filename = file_path(path)
+    filename = file_path(filename)
     tasks = logic.read_file(filename)
+
+    if tasks == "":
+        tab = tabulate.tabulate([[f"Todo list does not exist: {basename(filename)}"]],tablefmt="fancy_grid")
+        print(tab)
+        return
+
 
     if len(tasks) < 1:
         tab = tabulate.tabulate([["You have no available tasks."]],tablefmt="fancy_grid")
         print(tab)
         return
 
-
     try:
         terminal_size = get_terminal_size() + 10
     except Exception as e:
         terminal_size = 50
 
-    requested_data = logic.view_task(tasks,filter.upper())
+    requested_data = logic.view_task(tasks,show.upper())
     headers = ["ID","PRIORITY","NAME","DESCRIPTION","STATUS"]
     tab = tabulate.tabulate(requested_data,headers=headers,tablefmt="fancy_grid",maxcolwidths=terminal_size)
-    print(end=tab)
+    print(tab)
 
     return
 
@@ -258,45 +273,66 @@ def change_status(index,status,filename):
 @main.command(help = "create a new todo_list file")
 @click.option("-f","--filename",required=1, prompt = "Enter the name of the file")
 def create_file(filename):
+    """
+    Creates a new todo_list file. All new files gets saved in the Downloads/TaskIT
+
+    Args:
+        filename (str): file name
+    """
     file = file_path(filename)
+
     if exists(file) and isfile(file):
-        choice = input(f"{basename(file)} already exists. Enter yes to overwrite file: ").lower()
+        tab = tabulate.tabulate([[f"{basename(file)} already exists."]],tablefmt="fancy_grid")
+        print("\n",end=tab)
+        choice = input(f"\nEnter yes to overwrite file: ").lower()
         if choice in ["yes","y"]:
             with open(file,"w") as f:
                 f.close()
+            tab = tabulate.tabulate([[f"{basename(file)} has been created"]],tablefmt="fancy_grid")
         else:
-            print(f"Could not create {basename(file)}.")
+            tab = tabulate.tabulate([[f"Could not create {basename(file)}."]],tablefmt="fancy_grid")
     elif not exists(filename):
         with open(file,"w") as f:
             f.close()
-        print(f"{basename(file)} has been created")
     else:
-        print(f"Error could not create {basename(file)}")
-    
-        return
+        tab = tabulate.tabulate([[f"Error could not create {basename(file)}"]],tablefmt="fancy_grid")
+
+    print(tab)
+    return
 
 @main.command(help="delete an existing task file")
 @click.option("-f","--filename",required=1, prompt = "Enter the name of the file")
 def delete_file(filename):
+    """
+    Deletes the to_do_list file if it exists
+    """
+
     files = listdir(MAIN_PATH)
     filename = file_path(filename)
     choice = ""
-    
+
 
     if basename(filename) in files:
         choice = input("Confirm (yes/no): ").lower().strip()
     else:
-        print(f"{filename} does not exist.")
+        tab = tabulate.tabulate([[f"{basename(filename)} does not exist."]],tablefmt="fancy_grid")
+        print(tab)
         return
-    
+
     if choice in ["yes","y"] and exists(filename) and isfile(filename):
         remove(file_path(filename))
-        print(f"{basename(filename)} deleted!")
+        tab = tabulate.tabulate([[f"{basename(filename)} has been deleted"]],tablefmt="fancy_grid")
+
     else:
         if not isfile(filename):
-            print(f"{filename} is a dir.")
-        print(f"Aborting operation...")
-    
+            print(f"{filename} .")
+            tab = tabulate.tabulate([[f"{basename(filename)} is a dir. \n Aborting operation"]],tablefmt="fancy_grid")
+            print(tab)
+            return
+        tab = tabulate.tabulate([["Aborting operation"]],tablefmt="fancy_grid")
+
+    print(tab)
+
     return
 
 @main.command(help="list all available todo lists")
@@ -385,16 +421,13 @@ def update_message(updated_data:list ):
 
     return message
 
-"""TODO: learn tabulate for viewing"""
 
 if __name__ == "__main__":
 
-    # if not exists(MAIN_PATH):
-    #     mkdir(MAIN_PATH)
-    # main()
-    # update_task(2,"TEST 2","Testing if it will wokr with spaces","U","todo_list")
-    # view_tasks("ALL","todo_list.txt")
-    change_status(1,"I","todo_list")
+    if not exists(MAIN_PATH):
+        mkdir(MAIN_PATH)
+    main()
+
 
 
 
