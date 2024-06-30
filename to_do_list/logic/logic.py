@@ -36,7 +36,7 @@ def add_task(task_name: str, description: str, priority:str, file_name = DEFAULT
         priority (str): PRIORITY of the task
 
     Returns:
-        message : success message
+        bool :
     """
 
     tasks = []
@@ -63,9 +63,9 @@ def add_task(task_name: str, description: str, priority:str, file_name = DEFAULT
         with open(file_name,"w") as file:
             file.writelines(tasks)
             file.close()
-        return f"Successful added {task_name} to {basename(file_name)}"
+        return True
     except Exception as e:
-        return f"Successful added {task_name} to {basename(file_name)}"
+        return False
 
 def view_task(trigger = DEFAULT_TRIGGER ,file_name = DEFAULT_FILENAME,):
     """
@@ -137,21 +137,18 @@ def view_task(trigger = DEFAULT_TRIGGER ,file_name = DEFAULT_FILENAME,):
 
 
 
-def delete_task(index, file_name = DEFAULT_FILENAME):
-    """_summary_
+def delete_task(task_data: list, file_name = DEFAULT_FILENAME):
+    """
+    Deletes an existing task form our todo_list file
 
     Args:
-        index (_type_): _description_
-        file_name (_type_, optional): _description_. Defaults to DEFAULT_FILENAME.
-
+        task_data (list): the data and index to update
+        filename (str): the file in which the task exists in
     Returns:
-        _type_: _description_
+        str : operation message_
     """
-    tasks = read_file(file_name)
-    if index > len(tasks)-1:
-        return 'Selected task number does not exists.'
 
-
+    index, tasks = task_data
     # confirm deleting
     choice = input(f"Confirm delete of task (y/yes): ").lower()
 
@@ -160,16 +157,16 @@ def delete_task(index, file_name = DEFAULT_FILENAME):
         del tasks[index]
 
         # stripping the newline character from the last entry in the list
-        tasks[len(tasks)-1] = tasks[len(tasks)-1].strip()
+        # tasks[len(tasks)-1] = tasks[len(tasks)-1].strip()
 
         # overwriting the file with new data
         with open(file_name,"w") as file:
             file.writelines(tasks)
             file.close()
 
-        return f"Successful deleted task {index} from {basename(file_name)}"
+        return True
     else:
-        return f"Aborting operation."
+        return False
 
 
 def update_task(task_data : list ,new_task_data:list, file_name = DEFAULT_FILENAME):
@@ -235,7 +232,6 @@ def task_properties(task_data: str):
 def modify_task(original_task_data: list, new_task_data: tuple):
 
     priority , task_name, description = new_task_data
-    print(new_task_data)
 
     # priority only
     if task_name == "" and description == "" and priority != "":

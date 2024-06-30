@@ -45,8 +45,12 @@ def add_task(name: str,description:str ,priority: str, file_name:str ):
         else:
             file_name = file_path(user_input)
 
-    result = logic.add_task(name,description,priority,file_name)
-    tab = tabulate.tabulate([[result]],tablefmt="fancy_grid")
+    operation = logic.add_task(name,description,priority,file_name)
+
+    result = "Successfully added" if operation else "Failed to add"
+    message = f"{name} to {basename(file_name)}"
+
+    tab = tabulate.tabulate([[f"{result} {message}"]],tablefmt="fancy_grid")
     print(clear_term, end=tab+"\n")
     return
 
@@ -73,17 +77,17 @@ def update_task(index: int, name: str, description: str, priority: str ,filename
     tasks = logic.read_file(filename)
 
 
-    if index == 0 or index > len(tasks)-1:
+    if index == 0 or index > len(tasks):
         tab = tabulate.tabulate([['The selected task number does not exists.']],tablefmt="fancy_grid")
-        print(tab)
+        print(clear_term,end=tab+"\n")
         return
 
     # index correction so that we can retrieve correct data
     index -=1
     if name == "" and description == "" and priority =="":
-        new_task_data, message_one = update_menu()
+        new_task_data, message = update_menu()
         if new_task_data == ["","",""]:
-            tab = tabulate.tabulate([[f"{message_one} \nAborting operation..."]],tablefmt="fancy_grid")
+            tab = tabulate.tabulate([[f"{message} \nAborting operation..."]],tablefmt="fancy_grid")
             print(clear_term, end=tab+"\n")
             return
     else:
@@ -103,7 +107,7 @@ def update_task(index: int, name: str, description: str, priority: str ,filename
             print(clear_term, end=tab+"\n")
             return
 
-
+    # selecting task number and task name
     selected_task = f"Selected task {tasks[index][0].strip('\" \"')}: {tasks[index][3].strip(" ")}"
 
     message = update_message(new_task_data)
@@ -112,14 +116,12 @@ def update_task(index: int, name: str, description: str, priority: str ,filename
     result_message = "Successfully" if result else "Failed to"
     message = f"{result_message} updated the {message} of task {tasks[index][0].strip('\" \"')}."
 
-    print()
-    tab = tabulate.tabulate([["{} \n{}".format(selected_task,message)]],tablefmt="fancy_grid")
-    print(end=tab+"\n")
+    tab = tabulate.tabulate([[f"{selected_task} \n{message}"]],tablefmt="fancy_grid")
+    print(clear_term,end=tab+"\n")
+    return
 
 
 
-
-# in progress
 @main.command(help = "delete an existing task")
 @click.option("-i","--index",type=int,prompt = "Enter the task number",help="the index of the task you want to update")
 @click.option("-f","--filename",default =logic.DEFAULT_FILENAME,help="the name of the todo list file")
@@ -128,14 +130,30 @@ def delete_task(index,filename):
     Deletes an existing task form our todo_list file
 
     Args:
-        index (int): _description_
-        filename (_type_): _description_
+        index (int): the task ID number you want to delete
+        filename (str): the file in which the task exists in
     """
     filename = file_path(filename)
     tasks = logic.read_file(filename)
-    print(f"Selected task: {tasks[index]}",end="")
-    message = logic.delete_task(index,filename)
-    print(message)
+
+    if index == 0 or index > len(tasks):
+        tab = tabulate.tabulate([['The selected task number does not exists.']],tablefmt="fancy_grid")
+        print(clear_term,end=tab+"\n")
+        return
+
+    index -=1
+    data = logic.regex_split(tasks[index])
+    # selecting task number and task name
+
+    selected_task = f"Selected task {data[0].strip('\" \"')}: {data[3].strip(" ")}"
+
+    operation = logic.delete_task([index,tasks],filename)
+    
+    result_message = "Successfully deleted" if operation else "Failed to delete"
+    message = f"{result_message} task {index+1} from {basename(filename)}"
+    
+    tab = tabulate.tabulate([[f"{selected_task} \n{message}"]],tablefmt="fancy_grid")
+    print(clear_term,end=tab+"\n")
     return
 
 
