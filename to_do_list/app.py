@@ -51,7 +51,7 @@ def add_task(name: str,description:str ,priority: str, file_name:str ):
     return
 
 
-# completed
+
 @main.command(help="update an existing task.")
 @click.option("-i","--index",type=int,prompt = "Enter the task number",help="the index of the task you want to update")
 @click.option("-n","--name",help="the new name if you wish to update the name of the task",default = "")
@@ -82,19 +82,20 @@ def update_task(index: int, name: str, description: str, priority: str ,filename
     # index correction so that we can retrieve correct data
     index -=1
     if name == "" and description == "" and priority =="":
-        new_task_data, updating_data = update_menu()
+        new_task_data, message = update_menu()
         if new_task_data == ["","",""]:
-            tab = tabulate.tabulate([[f"{updating_data} \nAborting operation..."]],tablefmt="fancy_grid")
+            tab = tabulate.tabulate([[f"{message} \nAborting operation..."]],tablefmt="fancy_grid")
             print(clear_term, end=tab+"\n")
             return
     else:
-        new_task_data, updating_data = [name,description,priority.upper()]
+        # new_task_data, updating_data = [priority.upper(),name,description,]
+        new_task_data = [priority.upper(),name,description,]
 
     # the priority selected by the user
-    if new_task_data[2] != "":
-        if new_task_data[2].upper() in logic.PRIORITIES.keys():
-            new_task_data[2] = logic.PRIORITIES.get(new_task_data[2])
-        elif new_task_data[2].upper() in logic.PRIORITIES.values():
+    if new_task_data[0] != "":
+        if new_task_data[0] in logic.PRIORITIES.keys():
+            new_task_data[0] = logic.PRIORITIES.get(new_task_data[0])
+        elif new_task_data[0] in logic.PRIORITIES.values():
             pass
         else:
             m1 = f"You have chosen an invalid priority {new_task_data[2]}"
@@ -104,16 +105,17 @@ def update_task(index: int, name: str, description: str, priority: str ,filename
             return
 
 
-    selected_task = f"Selected task {tasks[index].split(" ")[0].strip("")}: {tasks[index].split(" ")[3].strip("")}"
+    selected_task = f"Selected task {tasks[index].split(" ")[0].strip('\" \"')}: {tasks[index].split(" ")[3].strip(" ")}"
 
     result = logic.update_task([index,tasks],new_task_data,filename)
+    message = update_message(new_task_data)
 
     result_message = "Successfully" if result else "Failed to"
-    update_message = f"{result_message} updated the {updating_data} of task {tasks[index].split(" ")[0].strip("")}."
+    message = f"{result_message} updated the {message} of task {tasks[index].split(" ")[0].strip('\" \"')}."
 
     print()
-    tab = tabulate.tabulate([["{} \n{}".format(selected_task,update_message)]],tablefmt="fancy_grid")
-    print(clear_term, end=tab+"\n")
+    tab = tabulate.tabulate([["{} \n{}".format(selected_task,message)]],tablefmt="fancy_grid")
+    print(end=tab+"\n")
 
 
 
@@ -263,23 +265,38 @@ def update_menu():
         print()
         if choice == "1":
             priority = input(f"Enter new priority {PR_PROMPT}: ")
-            return ["","",priority], "priority"
+            return ["","",priority.upper()], "priority"
         elif choice == "2":
             name = input(f"Enter the new task name: ")
-            return [name,"",""], "name"
+            return [name,"",""], ""
         elif choice == "3":
             desc= input("Enter the new task description: ")
-            return ["",desc,""], "description"
+            return ["",desc,""], ""
         elif choice == "4":
             priority = input(f"Enter new priority {PR_PROMPT}: ")
             name = input(f"Enter the new task name: ")
             desc= input("Enter the new task description: ")
-            return [name,desc,priority], "name, description and priority"
+            return [priority.upper(),name,desc], ""
 
         breaker +=1
 
+def update_message(updated_data:list ):
+    """
+    creates a custom message based of what got updated in the task
+    """
 
+    priority , name, description = updated_data
 
+    if priority != "" and name == "" and description =="":
+        message = "priority"
+    elif name != "" and priority == "" and description =="":
+        message = "name"
+    elif description != "" and name == "" and priority =="":
+        message = description
+    else:
+        message = "name, description and priority"
+
+    return message
 
 """TODO: learn tabulate for viewing"""
 
@@ -288,6 +305,7 @@ if __name__ == "__main__":
     if not exists(MAIN_PATH):
         mkdir(MAIN_PATH)
     main()
+    # update_task(2,"TEST 2","Testing if it will wokr with spaces","U","todo_list")
 
 
 
