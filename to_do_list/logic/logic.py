@@ -1,9 +1,6 @@
 """
 Handles the main logic for operating with / writing on to our todo list
 """
-from os.path import basename
-from os import get_terminal_size
-# from lib.tabulate import tabulate
 import re
 
 PRIORITIES = {
@@ -267,6 +264,15 @@ def change_status(task_data: list, status,file_name=DEFAULT_FILENAME):
 
 
 def get_dict_value(dic: dict, given_key:str):
+    """
+    returns the value of a given key if the key exists in a given dictionary
+    Args:
+        dic (dict): dictionary to retrieve data from
+        given_key (str): the key for teh value
+
+    Returns:
+        str : value
+    """
     for key, value in dic.items():
         if key == given_key:
             return value
@@ -275,6 +281,15 @@ def get_dict_value(dic: dict, given_key:str):
             return value
 
 def read_file(filename: str= DEFAULT_FILENAME):
+    """
+    reads data from a given file and returns a list of its contents
+
+    Args:
+        filename (str, optional): the name of the file. Defaults to todo_list.txt.
+
+    Returns:
+        list : a list of the lines in the file
+    """
     tasks_read = []
     try:
         with open(filename) as file:
