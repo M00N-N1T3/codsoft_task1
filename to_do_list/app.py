@@ -1,6 +1,6 @@
-from lib import click
+from lib import click, tabulate
 from logic import logic
-from logic.os_mod import DOWNLOADS, CWD, HOME,join, basename, exists, isfile, remove, listdir
+from logic.os_mod import DOWNLOADS, CWD, HOME,join, basename, exists, isfile, remove, listdir, mkdir
 
 
 def main_path():
@@ -9,12 +9,14 @@ def main_path():
 def file_path(file):
     file = f"{file}.txt" if not ".txt" in file else file
     return join(DOWNLOADS,"TaskIT",file)
-    
+
 
 PR_PROMPT = str(logic.PRIORITIES.values()).strip("dict_values()")
 STATUS_PROMPT = str(logic.STATUS.values()).strip("dict_values()")
 CONFIG_DIR = join(HOME,"betterMe")
 MAIN_PATH = main_path()
+clear_term ="\033c"
+
 
 @click.group()
 def main():
@@ -26,7 +28,15 @@ def main():
 @click.option("-d","--description", prompt ="Enter task description",help = "task description")
 @click.option("-p","--priority", prompt ="Enter task priority" + PR_PROMPT,help = "task priority")
 @click.option("-f","--file-name",default = "",help = "to-do_list filename")
-def add_task(name,description,priority,file_name):
+def add_task(name: str,description:str ,priority: str, file_name:str ):
+    """
+    Adds a new task to our todo list
+    Args:
+        name (str):the task name
+        description (str):task description
+        priority (str): the priority of the task
+        file_name (str, optional): todo_list file name if specified [Default = todo_list.txt]
+    """
 
     if file_name == "":
         user_input = input(f"Enter file in which to save the todo list ({logic.DEFAULT_FILENAME}): ")
@@ -35,7 +45,9 @@ def add_task(name,description,priority,file_name):
         else:
             file_name = file_path(user_input)
 
-    logic.add_task(name,description,priority,file_name)
+    result = logic.add_task(name,description,priority,file_name)
+    tab = tabulate.tabulate([[result]],tablefmt="fancy_grid")
+    print(clear_term, end=tab+"\n")
     return
 
 
@@ -46,32 +58,64 @@ def add_task(name,description,priority,file_name):
 @click.option("-d","--description",help = "the new description for the task if you wish to change the task description",default="")
 @click.option("-p","--priority",help=f"the new priority if you wish to update the task priority {PR_PROMPT}",default="")
 @click.option("-f","--filename",prompt = f"Enter the name of the file",default =logic.DEFAULT_FILENAME,help="the absolute path + filename of your todo list file")
-def update_task(index,name,description,priority,filename):
+def update_task(index: int, name: str, description: str, priority: str ,filename: str):
+    """
+    Updates an existing task
+    Args:
+        index (int): the index to update
+        name (str):the task name
+        description (str):task description
+        priority (str): the priority of the task
+        file_name (str, optional): todo_list file name if specified [Default = todo_list.txt]
+    """
 
     filename = file_path(filename)
     tasks = logic.read_file(filename)
-    print(f"Selected task: {tasks[index]}")
+    updating_data = ""
 
+
+    if index == 0 or index > len(tasks)-1:
+        tab = tabulate.tabulate([['The selected task number does not exists.']],tablefmt="fancy_grid")
+        print(tab)
+        return
+
+    # index correction so that we can retrieve correct data
+    index -=1
     if name == "" and description == "" and priority =="":
-        new_task_data = update_menu()
-        if new_task_data == ("","",""):
-            print("Aborting operation...")
+        new_task_data, updating_data = update_menu()
+        if new_task_data == ["","",""]:
+            tab = tabulate.tabulate([[f"{updating_data} \nAborting operation..."]],tablefmt="fancy_grid")
+            print(clear_term, end=tab+"\n")
             return
     else:
-        new_task_data = [name,description,priority.upper()]
+        new_task_data, updating_data = [name,description,priority.upper()]
 
+    # the priority selected by the user
     if new_task_data[2] != "":
         if new_task_data[2].upper() in logic.PRIORITIES.keys():
             new_task_data[2] = logic.PRIORITIES.get(new_task_data[2])
         elif new_task_data[2].upper() in logic.PRIORITIES.values():
             pass
         else:
-            print(f"You have chosen an invalid priority {new_task_data[2]}")
-            print(f"These are the available priorities {PR_PROMPT}")
+            m1 = f"You have chosen an invalid priority {new_task_data[2]}"
+            m2 = f" \nThese are the available priorities {PR_PROMPT}"
+            tab = tabulate.tabulate([[m1 + m2]],tablefmt="fancy_grid")
+            print(clear_term, end=tab+"\n")
             return
 
-    logic.update_task(index,new_task_data,filename)
-    return
+
+    selected_task = f"Selected task {tasks[index].split(" ")[0].strip("")}: {tasks[index].split(" ")[3].strip("")}"
+
+    result = logic.update_task([index,tasks],new_task_data,filename)
+
+    result_message = "Successfully" if result else "Failed to"
+    update_message = f"{result_message} updated the {updating_data} of task {tasks[index].split(" ")[0].strip("")}."
+
+    print()
+    tab = tabulate.tabulate([["{} \n{}".format(selected_task,update_message)]],tablefmt="fancy_grid")
+    print(clear_term, end=tab+"\n")
+
+
 
 
 # in progress
@@ -79,6 +123,13 @@ def update_task(index,name,description,priority,filename):
 @click.option("-i","--index",type=int,prompt = "Enter the task number",help="the index of the task you want to update")
 @click.option("-f","--filename",default =logic.DEFAULT_FILENAME,help="the name of the todo list file")
 def delete_task(index,filename):
+    """
+    Deletes an existing task form our todo_list file
+
+    Args:
+        index (int): _description_
+        filename (_type_): _description_
+    """
     filename = file_path(filename)
     tasks = logic.read_file(filename)
     print(f"Selected task: {tasks[index]}",end="")
@@ -161,16 +212,24 @@ def delete_file(filename):
 
 @main.command(help="list all available todo lists")
 def list_all():
+    """
+    Lists all the available todo list files in your Downloads/TaskIT folder
+    """
+
     files = listdir(MAIN_PATH)
-    if len(files) < 1:
-        print("You currently own no todo_list files")
+    clean_data = [file for file in files if ".txt" in file]
+
+    if len(clean_data) < 1:
+        tab = tabulate.tabulate(["You currently do not have any todo_lists"],tablefmt="fancy_grid")
+        print(tab)
         return
-    else:
-        print("Your available todo_list files: ")
-        
-    for file in  files:
-        print(file)
-        
+
+    # creating a numbering system
+    todo_list_files = [[clean_data.index(file)+1 ,file] for file in clean_data]
+
+    # tabulating data
+    tab = tabulate.tabulate(todo_list_files,headers=["","Available Files"],tablefmt="fancy_grid")
+    print(tab)
 
 # helpers
 def update_menu():
@@ -179,61 +238,57 @@ def update_menu():
     change via flags
 
     Returns:
-        tuple : (str,str,str)
+        tuple : [str,str,str],message
     """
 
-    print('''1) Change priority.
-2) Change task name.
-3) Change description.
-4) Change all.
-0) Cancel\n''')
+
+    header = ["","options"]
+    tab = tabulate.tabulate([[1,"Change Priority"],[2, "Change task name"],
+        [3, "Change description"],[4,"Change all"],
+        [0,"Cancel"]],tablefmt="outline",headers=header)
 
     breaker = 0
 
     while True:
+        print(clear_term)
+        print(tab)
         choice = input('Select only one of the above options: ').lower().strip()
 
         if breaker > 2 or choice == "0":
+            message = "Canceled"
             if choice != "0":
-                print('To many incorrect entires.')
-            return "","",""
+                message = "To many attempts"
+            return ["","",""], message
 
+        print()
         if choice == "1":
-            priority = input(f"Enter new priority [{PR_PROMPT}]: ")
-            return ["","",priority]
+            priority = input(f"Enter new priority {PR_PROMPT}: ")
+            return ["","",priority], "priority"
         elif choice == "2":
             name = input(f"Enter the new task name: ")
-            return [name,"",""]
+            return [name,"",""], "name"
         elif choice == "3":
             desc= input("Enter the new task description: ")
-            return ["",desc,""]
+            return ["",desc,""], "description"
         elif choice == "4":
-            priority = input(f"Enter new priority [{PR_PROMPT}]: ")
+            priority = input(f"Enter new priority {PR_PROMPT}: ")
             name = input(f"Enter the new task name: ")
             desc= input("Enter the new task description: ")
-            return [name,desc,priority]
+            return [name,desc,priority], "name, description and priority"
 
         breaker +=1
-        
 
 
-"""TODO: a setup that checks for a config. the config stores all the available todo list paths"""
+
+
 """TODO: learn tabulate for viewing"""
-"""TODO: test the status update, create a new todo list"""
-"""TODO: Add a logic for length less than 5 then do not write it"""
+
 if __name__ == "__main__":
-    # print(logic.PRIORITIES.values())
-    # print(PR_PROMPT)
+
+    if not exists(MAIN_PATH):
+        mkdir(MAIN_PATH)
     main()
-    # add_task()
-    # path = "/home/wtc/Desktop/project_space/CODSOFT/to_do_list/todo_list.txt"
-    # logic.view_task("L",path)
-    # update_menu()
-    # logic.update_task(1,("p","test1","test"),path)
-    # add()
-    # update_task()
-    
-    pass
+
 
 
 

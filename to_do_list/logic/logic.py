@@ -2,6 +2,8 @@
 Handles the main logic for operating with / writing on to our todo list
 """
 from os.path import basename
+from os import get_terminal_size
+# from lib.tabulate import tabulate
 
 PRIORITIES = {
     "O" : "OPTIONAL",
@@ -20,7 +22,7 @@ STATUS = {
 DEFAULT_FILENAME = "todo_list.txt"
 DEFAULT_TRIGGER = "ALL"
 DEFAULT_STATE = "NOT STARTED"
-HEADER = "[PRIORITY] [STATUS] - NAME: DESCRIPTION"
+
 
 def add_task(task_name: str, description: str, priority:str, file_name = DEFAULT_FILENAME,status = DEFAULT_STATE):
     """
@@ -38,10 +40,6 @@ def add_task(task_name: str, description: str, priority:str, file_name = DEFAULT
 
     tasks = []
 
-    priority = get_dict_value(PRIORITIES,priority.upper())
-    string = f"[{priority}] [{status}] - {task_name}: {description}"
-
-
     try:
         # first we try to read the data on the file
         with open(file_name,"r") as file:
@@ -49,18 +47,24 @@ def add_task(task_name: str, description: str, priority:str, file_name = DEFAULT
     except (FileNotFoundError):
         pass
 
-    # ensuring that the file will always have a Header
-    if len(tasks) <= 0 or tasks[0].strip() != HEADER:
-        tasks.insert(0,HEADER)
+    priority = get_dict_value(PRIORITIES,priority.upper())
+    task = f'"{len(tasks)+1}" "{priority}" "{task_name}" "{description}" "{status}"'
 
     # appending new task to list of current tasks
-    tasks.append(f'\n{string}')
+    if len(tasks) >= 1 and not "\n" in tasks[len(tasks)-1][-1]: # [-1] indicates last element
+        tasks.append(f'\n{task}')
+    else:
+        tasks.append(task)
+
 
     # overwriting the file with new data
-    with open(file_name,"w") as file:
-        file.writelines(tasks)
-        file.close()
-    return f"Successful added {task_name} to {basename(file_name)}."
+    try :
+        with open(file_name,"w") as file:
+            file.writelines(tasks)
+            file.close()
+        return f"Successful added {task_name} to {basename(file_name)}"
+    except Exception as e:
+        return f"Successful added {task_name} to {basename(file_name)}"
 
 def view_task(trigger = DEFAULT_TRIGGER ,file_name = DEFAULT_FILENAME,):
     """
@@ -72,7 +76,9 @@ def view_task(trigger = DEFAULT_TRIGGER ,file_name = DEFAULT_FILENAME,):
     """
     tasks = read_file(file_name)
     if len(tasks) < 1:
-        print("You have no tasks.")
+        result = tabulate([["You have no tasks."]],tablefmt="fancy_grid")
+        # print(result)
+        return
 
     for key, value in PRIORITIES.items():
 
@@ -88,24 +94,45 @@ def view_task(trigger = DEFAULT_TRIGGER ,file_name = DEFAULT_FILENAME,):
             trigger = value
             break
 
-    for task in enumerate(tasks):
+    # for task in enumerate(tasks):
 
-        if f'{HEADER}\n' in task or task[1].strip() == HEADER:
-            print('[#] ',task[1].strip())
+    #     if f'{HEADER}\n' in task or task[1].strip() == HEADER:
+    #         print(tabulate('[#] ',task[1].strip()))
+    #     else:
+
+    #         # prints everything in the list
+    #         if trigger == DEFAULT_TRIGGER:
+    #             print(f'[{task[0]}]',"",task[1], end="")
+
+    #         # prints only requested data
+    #         elif trigger in task[1]:
+    #             print(f'[{task[0]}]',"",task[1], end="")
+
+    #     if "\n" in task[1] and trigger in task:
+    #         print()
+    #     elif "\n" not in task[1] and trigger == DEFAULT_TRIGGER:
+    #         print()
+
+    # for task in tasks:
+
+    try:
+        terminal_size = get_terminal_size() + 10
+    except Exception as e:
+        terminal_size = 50
+
+    headers = ["ID","PRIORITY","NAME","DESCRIPTION"]
+    data = [task.strip().split(" ") for task in tasks if trigger]
+
+    requested_data = []
+    for task in data:
+        if trigger == "ALL":
+            requested_data.append(task)
         else:
+            if trigger in task:
+                requested_data.append(task)
 
-            # prints everything in the list
-            if trigger == DEFAULT_TRIGGER:
-                print(f'[{task[0]}]',"",task[1], end="")
+    print(tabulate(requested_data,headers=headers,tablefmt="fancy_grid",maxcolwidths=terminal_size))
 
-            # prints only requested data
-            elif trigger in task[1]:
-                print(f'[{task[0]}]',"",task[1], end="")
-
-        if "\n" in task[1] and trigger in task:
-            print()
-        elif "\n" not in task[1] and trigger == DEFAULT_TRIGGER:
-            print()
 
 
 
@@ -144,41 +171,37 @@ def delete_task(index, file_name = DEFAULT_FILENAME):
         return f"Aborting operation."
 
 
-def update_task(index : int,new_task_data:list, file_name = DEFAULT_FILENAME):
+def update_task(task_data : list ,new_task_data:list, file_name = DEFAULT_FILENAME):
+    """
+    Updates an existing task within our todo_list file
 
-    # tasks = []
-    # priority,task_name,description = new_task_data
+    Args:
+        task_data (list): the data and index to update
+        new_task_data (list): the data to inject
+        file_name (str, optional): todo_list file name if specified [Default = todo_list.txt]
 
-    tasks = read_file(file_name)
-
-    # try:
-    #     with open(file_name,'r') as file:
-    #         tasks = file.readlines()
-    #         file.close()
-    # except (FileNotFoundError):
-    #     print("Todo list does not exist")
-    #     return
-
-    if index > len(tasks)-1:
-        print('Selected task number does not exists.')
-        return
-
-    print(f'Selected task: {tasks[index].strip()}')
+    Returns:
+        str: result message
+    """
+    write = False
+    index, tasks = task_data
 
     old_task_data = task_properties(tasks[index])
 
     new_task = modify_task(old_task_data,new_task_data)
-    
+
     tasks[index] = new_task if index == len(tasks)-1 else f"{new_task}\n"
 
-    """TODO: WRITE the data"""
     # overwriting the file with new data
-    with open(file_name,"w") as file:
-        file.writelines(tasks)
-        file.close()
-    print(f"Successfully updated task {index}.")
+    try:
+        with open(file_name,"w") as file:
+            file.writelines(tasks)
+            file.close()
+        write = True
+    except Exception as e:
+        pass
 
-    return new_task
+    return write
 
 
 
@@ -192,17 +215,15 @@ def task_properties(task: str):
         list :
     """
 
-    task_data = task.split("-")[0].strip()
+    task_data = task.split(" ")
 
-    # [Complete]
-    task_state = task_data.split("]")[1].replace("[","").replace("]","").strip()
-    # [urgent]
-    task_priority = task_data.split("]")[0].replace("[","").replace("]","").strip()
+    task_id = task_data[0]
+    task_state = task_data[1]
+    task_priority = task_data[2]
+    task_name  = task_data[3]
+    task_description  = task_data[4]
 
-    task_name  = task.split("-")[1].split(":")[0].strip()
-    task_description  = task.split("-")[1].split(":")[1].strip()
-
-    return [task_priority, task_state, task_name, task_description]
+    return [task_id,task_priority, task_state, task_name, task_description]
 
 
 
@@ -212,7 +233,7 @@ def modify_task(original_task_data: list, new_task_data: tuple):
 
     # priority only
     if task_name == "" and description == "" and priority != "":
-        original_task_data[0] = priority
+        original_task_data[1] = priority
 
     # name only
     elif task_name != "" and description == "" and priority == "":
@@ -230,20 +251,20 @@ def modify_task(original_task_data: list, new_task_data: tuple):
     # name and priority
     elif task_name != "" and description == "" and priority != "":
         original_task_data[2] = task_name
-        original_task_data[0] = priority
+        original_task_data[1] = priority
 
     # priority and description
     elif task_name == "" and description != "" and priority != "":
-        original_task_data[0] = priority
+        original_task_data[1] = priority
         original_task_data[3] = description
 
     # everything
     else:
-        original_task_data[0] = priority
+        original_task_data[1] = priority
         original_task_data[2] = task_name
         original_task_data[3] = description
 
-    return f"[{original_task_data[0]}] [{original_task_data[1]}] - {original_task_data[2]}: {original_task_data[3]}"
+    return f'{original_task_data[0]} "{original_task_data[1]}" "{original_task_data[2]}" "{original_task_data[3]}" "{original_task_data[4]}"'
 
 
 
@@ -297,6 +318,6 @@ def read_file(filename: str= DEFAULT_FILENAME):
         with open(filename) as file:
             tasks = file.readlines()
     except (FileNotFoundError):
-        exit("Todo list does not exist")
+        exit("Todo list does not exist: {}".format(DEFAULT_FILENAME))
 
     return tasks
