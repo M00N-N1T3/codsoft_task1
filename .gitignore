@@ -1,6 +1,1 @@
-# dir
-__pycache__
-
-
-# files
-*.zip
+*pycache*

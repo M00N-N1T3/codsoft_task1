@@ -1,6 +1,4 @@
 from lib import tkinter as tk
-# import tkinter as tk
-# from tkinter import messagebox
 from lib.tkinter import messagebox
 
 DEFAULT_FONT = ("Arial",16)
