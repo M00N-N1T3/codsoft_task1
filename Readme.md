@@ -30,7 +30,9 @@
 
     ```bash
     git clone git@github.com:M00N-N1T3/codsoft_task1.git
+    cd codosft_task1
     ```
+
 
 ## Execution
 
